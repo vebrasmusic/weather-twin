@@ -2,8 +2,10 @@ import Image from "next/image";
 
 export default function Home() {
   return (
-    <main>
-      hi
+    <main className="flex flex-col items-center justify-center">
+      {/* main div */}
+      <div>
+      </div>
     </main>
   );
 }
