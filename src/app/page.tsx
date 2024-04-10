@@ -17,7 +17,7 @@ export default function Home() {
             {/* Title */}
             <div>
               <h1 className="text-slate-200 font-bold text-4xl">Weather Twin</h1>
-              <h2 className="text-slate-400 font-semibold text-1xl">Find which city has a similar climate to yours!</h2>
+              <h2 className="text-slate-400 font-semibold text-1xl">Find cities with climates matching your own!</h2>
             </div>
             <MainForm />
           </div>

@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -12,13 +13,24 @@ import { Input } from "@/components/ui/input"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+
+const apiUrl = process.env.NEXT_PUBLIC_API_URL
  
 const formSchema = z.object({
-  cityName: z.string().min(2, { message: "City name is required" }).max(100, { message: "City name must be less than 100 characters" }).regex(/^[A-Za-z]+$/, { message: "City name must contain only letters" })
+  cityName: z.string().min(2, { message: "City name is required" }).max(100, { message: "City name must be less than 100 characters" }).regex(/^[A-Za-z\s]+$/, { message: "City name must contain only letters and spaces" })
 })
 
-function onSubmit(values: z.infer<typeof formSchema>) {
-  console.log(values)
+async function onSubmit(values: z.infer<typeof formSchema>) {
+    const params = {
+        cityName: values.cityName
+    }
+
+    try {
+        const response = await axios.get(`${apiUrl}/cities/match`, {params});   
+        console.log(response.data);
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 export const MainForm = () => {
@@ -52,6 +64,5 @@ export const MainForm = () => {
                 <Button type="submit" className="bg-slate-200 text-slate-950 hover:bg-slate-300">Submit</Button>
             </form>
         </Form>
-
     )
 }
