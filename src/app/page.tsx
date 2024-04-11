@@ -16,7 +16,7 @@ export default function Home() {
           <div className="flex flex-col gap-4">
             {/* Title */}
             <div>
-              <h1 className="text-slate-200 font-bold text-4xl">Weather Twin</h1>
+              <h1 className="text-slate-200 font-bold text-4xl"><a href="/">Weather Twin</a></h1>
               <h2 className="text-slate-400 font-semibold text-1xl">Find cities with climates matching your own!</h2>
             </div>
             <MainForm />
@@ -34,7 +34,7 @@ export default function Home() {
         </div>
       </section>
       {/* about section */}
-      <section>
+      <section className="flex flex-col items-center gap-10 justify-center h-screen bg-slate-900">
         <h1 className="text-slate-200 font-bold text-4xl">About</h1>
       </section>
     </main>

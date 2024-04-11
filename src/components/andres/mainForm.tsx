@@ -61,7 +61,7 @@ export const MainForm = () => {
                     </FormItem>
                 )}
                 />
-                <Button type="submit" className="bg-slate-200 text-slate-950 hover:bg-slate-300">Submit</Button>
+                <Button type="submit" className="bg-slate-300 text-slate-950 hover:bg-slate-300">Submit</Button>
             </form>
         </Form>
     )
