@@ -9,34 +9,36 @@ provider:
   runtime: nodejs18.x
   stage: ${opt:stage, 'dev'}
 
-# environment: 
-  # the .env for the backend should be in the root of the service folder
-  # these are accessible to FUNCTIONS
+  environment: 
+    # the .env for the backend should be in the root of the service folder
+    # these are accessible to FUNCTIONS
+    PINECONE_API_KEY: ${env:PINECONE_API_KEY}
+    OPENCAGE_API_KEY: ${env:OPENCAGE_API_KEY}
     # LOOPS_API_KEY: ${env:LOOPS_API_KEY} (example with env)
     # MIXPANEL_TOKEN: ${self:custom.MIXPANEL_TOKEN.${self:provider.stage}} (example with custom)
 
-# iamRoleStatements:
-  # IAM Role Statements define the permissions for the Lambda function.
-  # Each statement has an Effect, Action, and Resource. 
-  # 'Effect' is either 'Allow' or 'Deny', stating whether the action is allowed or denied.
-  # 'Action' is the specific AWS service action for which permissions are being stated.
-  # 'Resource' is the AWS resource upon which the action is performed.
-  # Here, we are allowing the Lambda function to list all SageMaker training jobs, etc.
-  # The '*' in the Resource field means that the permission applies to all resources of the specified type.
+  # iamRoleStatements:
+  #   IAM Role Statements define the permissions for the Lambda function.
+  #   Each statement has an Effect, Action, and Resource. 
+  #   'Effect' is either 'Allow' or 'Deny', stating whether the action is allowed or denied.
+  #   'Action' is the specific AWS service action for which permissions are being stated.
+  #   'Resource' is the AWS resource upon which the action is performed.
+  #   Here, we are allowing the Lambda function to list all SageMaker training jobs, etc.
+  #   The '*' in the Resource field means that the permission applies to all resources of the specified type.
 
-  # The Resource URLs in the IAM Role Statements are ARNs (Amazon Resource Names) which uniquely identify AWS resources.
-  # They are constructed based on the resource type, region, AWS account ID, and the resource name/ID.
-  # For example, the ARN for an SQS queue would be constructed as follows:
-  # arn:aws:sqs:<region>:<account-id>:<queue-name>
-  # Similarly, for a DynamoDB table, it would be:
-  # arn:aws:dynamodb:<region>:<account-id>:table/<table-name>
-  # These ARNs are used in the 'Resource' field of IAM Role Statements to specify which resources the Lambda function has permissions to interact with.
-  # To obtain these ARNs, you can navigate to the specific service dashboard in the AWS Management Console and find the ARN associated with the resource.
-  # Alternatively, you can use AWS CLI commands or AWS SDKs to retrieve the ARNs programmatically.
-    # - Effect: Allow
-    #   Action:
-    #     - sagemaker:ListTrainingJobs
-    #   Resource: '*'
+  #   The Resource URLs in the IAM Role Statements are ARNs (Amazon Resource Names) which uniquely identify AWS resources.
+  #   They are constructed based on the resource type, region, AWS account ID, and the resource name/ID.
+  #   For example, the ARN for an SQS queue would be constructed as follows:
+  #   arn:aws:sqs:<region>:<account-id>:<queue-name>
+  #   Similarly, for a DynamoDB table, it would be:
+  #   arn:aws:dynamodb:<region>:<account-id>:table/<table-name>
+  #   These ARNs are used in the 'Resource' field of IAM Role Statements to specify which resources the Lambda function has permissions to interact with.
+  #   To obtain these ARNs, you can navigate to the specific service dashboard in the AWS Management Console and find the ARN associated with the resource.
+  #   Alternatively, you can use AWS CLI commands or AWS SDKs to retrieve the ARNs programmatically.
+  #     - Effect: Allow
+  #       Action:
+  #         - sagemaker:ListTrainingJobs
+  #       Resource: '*'
 
 # custom:
 # The 'custom' section in serverless.yml is used to define variables that can be reused throughout the configuration.
@@ -89,4 +91,3 @@ functions:
               - X-Api-Key
               - X-Amz-Security-Token
               - X-Amz-User-Agent
-

@@ -17,7 +17,7 @@ import { useForm } from "react-hook-form"
 const apiUrl = process.env.NEXT_PUBLIC_API_URL
  
 const formSchema = z.object({
-  cityName: z.string().min(2, { message: "City name is required" }).max(100, { message: "City name must be less than 100 characters" }).regex(/^[A-Za-z\s]+$/, { message: "City name must contain only letters and spaces" })
+  cityName: z.string().min(2, { message: "Address is required" }).max(100, { message: "City name must be less than 100 characters" }).regex(/^[A-Za-z\s,',]+$/, { message: "City name must contain only letters, spaces, commas, and apostrophes" })
 })
 
 async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -27,9 +27,11 @@ async function onSubmit(values: z.infer<typeof formSchema>) {
 
     try {
         const response = await axios.get(`${apiUrl}/cities/match`, {params});   
+        //TODO: loading screen
         console.log(response.data);
     } catch (error) {
         console.log(error);
+        //TODO: error message did u type it in right?
     }
 }
 
