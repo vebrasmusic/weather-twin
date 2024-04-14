@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -20,22 +21,12 @@ const formSchema = z.object({
   cityName: z.string().min(2, { message: "Address is required" }).max(100, { message: "City name must be less than 100 characters" }).regex(/^[A-Za-z\s,',]+$/, { message: "City name must contain only letters, spaces, commas, and apostrophes" })
 })
 
-async function onSubmit(values: z.infer<typeof formSchema>) {
-    const params = {
-        cityName: values.cityName
-    }
 
-    try {
-        const response = await axios.get(`${apiUrl}/cities/match`, {params});   
-        //TODO: loading screen
-        console.log(response.data);
-    } catch (error) {
-        console.log(error);
-        //TODO: error message did u type it in right?
-    }
-}
+type MainFormProps = {
+    onSubmit: (data: any) => void; // Adjust the type based on your actual onSubmit function
+  };
 
-export const MainForm = () => {
+export const MainForm = ({onSubmit}: MainFormProps) => {
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),

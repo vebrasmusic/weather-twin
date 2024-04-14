@@ -4,6 +4,7 @@
 
 
 const OPENCAGE_API_KEY = process.env.OPENCAGE_API_KEY;
+const PINECONE_API_KEY = process.env.PINECONE_API_KEY;
 const axios = require('axios');
 
 
@@ -47,10 +48,54 @@ const findCoordinates = async (cityName) => {
 
 const matchToUsCity = async (cityCoordinates) => {
   // this function is gonna search the US pinecone db to get a closest match to the entered coordinates, then return the vector we get.
-  // tbh, don't REALLY need pinecone for this.
-  
 
-}
+  const data = {
+    vector: [cityCoordinates.lat, cityCoordinates.lng], // Assuming lat and lng are the coordinates
+    topK: 1,
+    includeValues: true,
+    includeMetadata: true
+  };
+
+  try {
+    const response = await axios.post(`https://us-temps-1mdx40t.svc.aped-4627-b74a.pinecone.io/query`, data, {
+      headers: {
+        "Api-Key": PINECONE_API_KEY,
+        "Content-Type": "application/json"
+      }
+    });
+    return response.data.matches[0].metadata.vectors;
+  } catch (error) {
+    console.error('Error querying Pinecone:', error);
+    throw new Error('Failed to query Pinecone');
+  }
+};
+
+const matchToGlobalCity = async (cityVector) => {
+  // this function is gonna search the US pinecone db to get a closest match to the entered coordinates, then return the vector we get.
+
+  let vectorArray = JSON.parse(cityVector).map(Number);
+  console.log(vectorArray);
+
+  const data = {
+    vector: vectorArray,
+    topK: 5,
+    includeValues: false,
+    includeMetadata: true
+  };
+
+  try {
+    const response = await axios.post(`https://global-temps-1mdx40t.svc.aped-4627-b74a.pinecone.io/query`, data, {
+      headers: {
+        "Api-Key": PINECONE_API_KEY,
+        "Content-Type": "application/json"
+      }
+    });
+    return response.data.matches;
+  } catch (error) {
+    console.error('Error querying Pinecone:', error);
+    throw new Error('Failed to query Pinecone');
+  }
+};
 
 
 module.exports.matchCities = async (event) => {
@@ -58,8 +103,8 @@ module.exports.matchCities = async (event) => {
 
     const cityName = queryParams.cityName;
     const cityCoordinates = await findCoordinates(cityName);
-
-    const cityMatches = [];
+    const matchedCityVector = await matchToUsCity(cityCoordinates);
+    const globalMatchedCities = await matchToGlobalCity(matchedCityVector);
 
     // convert city to coordinates if the city isn't in list
     // get closest "city" to coordinates and use as base query
@@ -75,9 +120,8 @@ module.exports.matchCities = async (event) => {
         },
         body: JSON.stringify(
           {
-            message: `Got city ${cityName}`,
-            coordinates: cityCoordinates,
-            input: event,
+            globalMatchedCities: globalMatchedCities,
+            //input: event,
           },
           null,
           2
