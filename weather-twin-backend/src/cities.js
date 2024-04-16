@@ -63,7 +63,7 @@ const matchToUsCity = async (cityCoordinates) => {
         "Content-Type": "application/json"
       }
     });
-    return response.data.matches[0].metadata.vectors;
+    return response.data.matches[0];
   } catch (error) {
     console.error('Error querying Pinecone:', error);
     throw new Error('Failed to query Pinecone');
@@ -73,7 +73,7 @@ const matchToUsCity = async (cityCoordinates) => {
 const matchToGlobalCity = async (cityVector) => {
   // this function is gonna search the US pinecone db to get a closest match to the entered coordinates, then return the vector we get.
 
-  let vectorArray = JSON.parse(cityVector).map(Number);
+  let vectorArray = JSON.parse(cityVector.metadata.vectors).map(Number);
   console.log(vectorArray);
 
   const data = {
@@ -103,7 +103,17 @@ module.exports.matchCities = async (event) => {
 
     const cityName = queryParams.cityName;
     const cityCoordinates = await findCoordinates(cityName);
+    const queryCity = {
+      cityName: cityName,
+      coordinates: cityCoordinates,
+    }
+
     const matchedCityVector = await matchToUsCity(cityCoordinates);
+    const USMatchedCity = {
+      cityName: matchedCityVector.id,
+      coordinates: matchedCityVector.values,
+    }
+
     const globalMatchedCities = await matchToGlobalCity(matchedCityVector);
 
     // convert city to coordinates if the city isn't in list
@@ -121,6 +131,8 @@ module.exports.matchCities = async (event) => {
         body: JSON.stringify(
           {
             globalMatchedCities: globalMatchedCities,
+            queryCity: queryCity,
+            USMatchedCity: USMatchedCity,
             //input: event,
           },
           null,

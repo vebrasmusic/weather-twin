@@ -1,5 +1,3 @@
-import axios from "axios";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -48,7 +46,7 @@ export const MainForm = ({onSubmit}: MainFormProps) => {
                         <Input placeholder="San Diego" {...field} className="text-slate-200" />
                     </FormControl>
                     <FormDescription>
-                        Enter your city.
+                        {"Enter a U.S. city (make sure you spell it correctly...)"}
                     </FormDescription>
                     <FormMessage />
                     </FormItem>

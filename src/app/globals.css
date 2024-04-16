@@ -2,3 +2,15 @@
   @tailwind components;
   @tailwind utilities;
   
+body {
+  color: #FFFF;
+}
+
+.loading{
+  opacity: 0;
+  animation: loading-animation 1s linear forwards;
+}
+
+@keyframes loading-animation {
+  100% {opacity: 1;}
+}
