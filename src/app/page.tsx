@@ -70,10 +70,10 @@ export default function Home() {
           <h3 className="text-slate-400 font-bold text-sm">Made by <a href="https://andresduvvuri.com" className="text-slate-300 hover:text-slate-400">Andrés Duvvuri</a></h3>
         </div>
       </section>
-      {/* about section */}
+      {/* about section
       <section className="flex flex-col items-center gap-10 justify-center h-screen bg-slate-900">
         <h1 className="text-slate-200 font-bold text-4xl">About</h1>
-      </section>
+      </section> */}
     </main>
   );
 }
