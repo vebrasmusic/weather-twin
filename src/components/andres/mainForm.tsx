@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form"
 const apiUrl = process.env.NEXT_PUBLIC_API_URL
  
 const formSchema = z.object({
-  cityName: z.string().min(2, { message: "Address is required" }).max(100, { message: "City name must be less than 100 characters" }).regex(/^[A-Za-z\s,',]+$/, { message: "City name must contain only letters, spaces, commas, and apostrophes" })
+  cityName: z.string().min(2, { message: "City name is required" }).max(100, { message: "City name must be less than 100 characters" }).regex(/^[A-Za-z\s,',]+$/, { message: "City name must contain only letters, spaces, commas, and apostrophes" })
 })
 
 
