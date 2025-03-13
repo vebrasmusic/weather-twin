@@ -113,7 +113,7 @@ export default function WeatherTwin() {
 
           <div className="pb-8 px-6">
             <p className="text-gray-500 text-sm text-center max-w-md mx-auto">
-              Find cities around the world with climates matching your own
+              Find cities around the world with climates matching your own.
             </p>
           </div>
         </div>
@@ -123,7 +123,7 @@ export default function WeatherTwin() {
             <div className="flex justify-between items-center mb-6">
               <button
                 onClick={() => setResults(null)}
-                className="flex items-center text-sm text-gray-400 hover:text-gray-300 transition-colors"
+                className="flex hover:cursor-pointer items-center text-sm text-gray-400 hover:text-gray-300 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
