@@ -16,19 +16,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: "latest"
+          node-version: "18"
 
       - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Change directory to frontend
-        run: cd frontend
-
       - name: Install dependencies
+        working-directory: ./frontend
         run: pnpm install
 
       - name: Run TypeScript compiler
+        working-directory: ./frontend
         run: pnpm tsc
 
       - name: Run linter
+        working-directory: ./frontend
         run: pnpm lint
