@@ -9,7 +9,7 @@ import AnimatedBackground from "@/components/weather/animated-background";
 import SearchInput from "@/components/weather/search-input";
 
 export default function WeatherTwin() {
-  const [city, setCity] = useState("");
+  const [_, setCity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<{
     sourceCity: {
