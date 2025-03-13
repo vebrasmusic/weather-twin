@@ -76,7 +76,7 @@ export default function AnimatedBackground() {
           ctx.lineTo(this.points[i].x, this.points[i].y);
         }
 
-        ctx.strokeStyle = `rgba(120, 255, 170, ${this.opacity})`; // Brighter green
+        ctx.strokeStyle = `rgba(255, 255, 255, ${this.opacity})`; // Changed to white (from green)
         ctx.lineWidth = this.lineWidth;
         ctx.stroke();
       }

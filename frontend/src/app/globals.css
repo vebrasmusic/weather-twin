@@ -124,3 +124,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+.font-mono {
+  font-family: "JetBrains Mono", "SF Mono", "Menlo", "Monaco", "Consolas",
+    monospace;
+}
