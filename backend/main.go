@@ -17,14 +17,14 @@ func main() {
 			log.Println("Writing resp. failed: ", err)
 		}
 	})
-	r.Mount("/match", MatchRoutes())
+	r.Mount("/matches", MatchesRoutes())
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func MatchRoutes() chi.Router {
+func MatchesRoutes() chi.Router {
 	r := chi.NewRouter()
-	matchHandler := MatchHandler{}
-	r.Get("/", matchHandler.GetMatches)
+	matchesHandler := MatchesHandler{}
+	r.Get("/", matchesHandler.GetMatches)
 
 	return r
 }

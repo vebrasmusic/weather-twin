@@ -10,10 +10,10 @@ import (
 )
 
 // create a struct we attach some methods to as the route handlers
-type MatchHandler struct{}
+type MatchesHandler struct{}
 
-func (m MatchHandler) GetMatches(w http.ResponseWriter, r *http.Request) {
-	baseCity := r.URL.Query().Get("basecity")
+func (m MatchesHandler) GetMatches(w http.ResponseWriter, r *http.Request) {
+	baseCity := r.URL.Query().Get("baseCity")
 	fmt.Println(baseCity)
 	result, err := getLocalCoordinates(baseCity)
 	if err != nil {
