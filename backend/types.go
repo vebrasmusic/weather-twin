@@ -43,7 +43,7 @@ type OpencageResponse struct {
 				DecimalMark          string `json:"decimal_mark"`
 				HtmlEntity           string `json:"html_entity"`
 				IsoCode              string `json:"iso_code"`
-				IsoNumeric           int    `json:"iso_numeric"`
+				IsoNumeric           string `json:"iso_numeric"`
 				Name                 string `json:"name"`
 				SmallestDenomination int    `json:"smallest_denomination"`
 				Subunit              string `json:"subunit"`
@@ -141,3 +141,4 @@ type OpencageResponse struct {
 	} `json:"timestamp"`
 	TotalResults int `json:"total_results"`
 }
+
