@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -45,9 +46,9 @@ func getLocalCoordinates(baseCity string) (*OpencageResponse, error) {
 
 	// Check if the status code is not OK
 	if resp.StatusCode != http.StatusOK {
-		errMsg := fmt.Sprintf("Request failed with status: %d - %s", resp.StatusCode, http.StatusText(resp.StatusCode))
+		errMsg := errors.New("Request failed" + http.StatusText(resp.StatusCode))
 		fmt.Println(errMsg)
-		return nil, fmt.Errorf(errMsg) // Return a custom error
+		return nil, err
 	}
 
 	body, err := io.ReadAll(resp.Body)
