@@ -115,6 +115,10 @@ export default function WeatherTwin() {
             <p className="text-gray-500 text-sm text-center max-w-md mx-auto">
               Find cities around the world with climates matching your own.
             </p>
+            <p className="text-gray-500 text-sm text-center max-w-md mx-auto mt-4">
+              Disclaimer: This is using mock data right now as we build out the
+              backend.
+            </p>
           </div>
         </div>
       ) : (
