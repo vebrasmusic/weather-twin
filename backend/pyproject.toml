@@ -7,6 +7,8 @@ requires-python = ">=3.11"
 dependencies = [
     "annoy>=1.17.3",
     "fastapi[standard]>=0.115.12",
+    "geopy>=2.4.1",
+    "meteostat>=1.6.8",
     "numpy>=2.2.4",
     "pydantic>=2.10.6",
     "torch>=2.6.0",
