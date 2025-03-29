@@ -1,11 +1,14 @@
-from typing import List
 from fastapi import APIRouter
-from .processing import get_city_data
-from .schemas import CityData, Embeddings, CityMeta
+
+from cities.processing import Processing
+
 
 router = APIRouter()
 
 
 @router.get("/matches")
 def get_matches(city_name: str):
-    return get_city_data(city_name)
+    processing = (
+        Processing(city_name).get_city_coords().get_city_data().transform_city_data()
+    )
+    return None
