@@ -1,8 +1,11 @@
+from pathlib import Path
 from fastapi import APIRouter, HTTPException, status
 
 from cities.inference import Inference
 from cities.metadata_fetcher import MetadataFetcher
+from cities.pinecone import PineconeDb
 from cities.processing import Processing
+import pandas as pd
 
 
 router = APIRouter()
@@ -26,4 +29,5 @@ def get_matches(city_name: str):
         )
     embeddings_df = Inference(metadata_df, model_input_df).get_embeddings()
     city_data = MetadataFetcher(metadata_df, embeddings_df).get_koppen_code().finalize()
+    res = PineconeDb().query(city_data)
     return None

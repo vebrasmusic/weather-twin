@@ -108,7 +108,7 @@ class MetadataFetcher:
         city_data["embeddings"] = self.embeddings_df.to_dict("index")[0]
         city_data["metadata"] = self.metadata_df.to_dict("index")[0]
 
-        return city_data
+        return CityData(**city_data)
 
     #     self.final_df = self.embeddings_df.join(self.metadata_df, how="left")
     #     return self
