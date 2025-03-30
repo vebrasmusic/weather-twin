@@ -11,5 +11,8 @@ dependencies = [
     "meteostat>=1.6.8",
     "numpy>=2.2.4",
     "pydantic>=2.10.6",
+    "pywikibot>=10.0.0",
+    "rasterio>=1.4.3",
+    "scikit-learn>=1.6.1",
     "torch>=2.6.0",
 ]
