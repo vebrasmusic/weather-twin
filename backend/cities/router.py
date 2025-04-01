@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 
 from cities.inference import Inference
 from cities.metadata_fetcher import MetadataFetcher
@@ -6,7 +6,6 @@ from cities.pinecone import PineconeDb
 from cities.processing import Processing
 
 from cities.schemas import WeatherTwinResponse
-
 
 router = APIRouter(prefix="/api")
 
@@ -30,5 +29,5 @@ def get_matches(city_name: str) -> WeatherTwinResponse:
     embeddings_df = Inference(metadata_df, model_input_df).get_embeddings()
     city_data = MetadataFetcher(metadata_df, embeddings_df).get_koppen_code().finalize()
     input_city, match_cities = PineconeDb().query(city_data)
-    response = WeatherTwinResponse(input=input_city, matches=match_cities)
-    return response
+    resp = WeatherTwinResponse(input=input_city, matches=match_cities)
+    return resp
