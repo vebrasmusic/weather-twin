@@ -7,6 +7,7 @@ import ClimateData from "@/components/weather/climate-data";
 import ShareMenu from "@/components/weather/share-menu";
 import AnimatedBackground from "@/components/weather/animated-background";
 import SearchInput from "@/components/weather/search-input";
+import axios, { AxiosResponse } from "axios";
 
 export default function WeatherTwin() {
   const [city, setCity] = useState("");
@@ -45,51 +46,19 @@ export default function WeatherTwin() {
     };
   } | null>(null);
 
-  const handleSearch = (cityName: string) => {
+  const handleSearch = async (cityName: string) => {
     if (!cityName.trim()) return;
-
-    setCity(cityName);
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Mock data - in a real app, this would come from your API
-      setResults({
-        sourceCity: {
-          name: cityName,
-          lat: 32.7157,
-          lng: -117.1611,
-          country: "United States",
-          stats: {
-            temp: 22,
-            humidity: 65,
-            windSpeed: 12,
-            rainfall: 260,
-          },
-          koppen: "Csa",
-          koppenFull: "Mediterranean hot summer climate",
-        },
-        matchCity: {
-          name: "Casablanca",
-          lat: 33.5731,
-          lng: -7.5898,
-          country: "Morocco",
-          climate: "Mediterranean",
-          description:
-            "Casablanca has a Mediterranean climate with mild, wet winters and hot, dry summers. The average temperature ranges from 12°C (54°F) in winter to 23°C (73°F) in summer, similar to coastal Southern California.",
-          stats: {
-            temp: 21,
-            humidity: 70,
-            windSpeed: 14,
-            rainfall: 280,
-          },
-          matchPercentage: 92,
-          koppen: "Csa",
-          koppenFull: "Mediterranean hot summer climate",
-        },
-      });
+    try {
+      const response: AxiosResponse = await axios.get(
+        `http://localhost:8000/api/matches?city_name=${cityName}`,
+      );
+      console.log(response.data);
+    } catch (e: unknown) {
       setIsLoading(false);
-    }, 1500);
+      throw new Error(e);
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -234,9 +203,9 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.temp -
-                                results.matchCity.stats.temp
+                                results.matchCity.stats.temp,
                             ) *
-                              10
+                              10,
                         )}%`,
                       }}
                     ></div>
@@ -263,8 +232,8 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.humidity -
-                                results.matchCity.stats.humidity
-                            )
+                                results.matchCity.stats.humidity,
+                            ),
                         )}%`,
                       }}
                     ></div>
@@ -291,9 +260,9 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.windSpeed -
-                                results.matchCity.stats.windSpeed
+                                results.matchCity.stats.windSpeed,
                             ) *
-                              5
+                              5,
                         )}%`,
                       }}
                     ></div>
@@ -320,9 +289,9 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.rainfall -
-                                results.matchCity.stats.rainfall
+                                results.matchCity.stats.rainfall,
                             ) /
-                              5
+                              5,
                         )}%`,
                       }}
                     ></div>
