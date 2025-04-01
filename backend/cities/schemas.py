@@ -51,3 +51,8 @@ class PineconeQueryResponse(BaseModel):
     matches: list[PineconeQueryMatch]
     namespace: str
     usage: dict[str, int]
+
+
+class WeatherTwinResponse(BaseModel):
+    input: CityData
+    matches: list[CityData]

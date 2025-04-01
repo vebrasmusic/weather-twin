@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 import os
-from typing import List
-from numpy import sort
-from pinecone import Pinecone, QueryResponse, ServerlessSpec
+from pinecone import Pinecone
 from dotenv import load_dotenv
 from cities.util import Util
 
@@ -15,7 +13,7 @@ pc_host = "https://weather-twin-embeddings-31616a9.svc.aped-4627-b74a.pinecone.i
 
 class VectorDb(ABC):
     @abstractmethod
-    def query(self, city_data: CityData):
+    def query(self, city_data: CityData) -> tuple[CityData, list[CityData]]:
         pass
 
 
@@ -59,7 +57,7 @@ class PineconeDb(VectorDb):
             transformed_matches.append(match_city)
         return transformed_matches
 
-    def query(self, city_data: CityData):
+    def query(self, city_data: CityData) -> tuple[CityData, list[CityData]]:
         vec = [
             city_data.embeddings.embed_x,
             city_data.embeddings.embed_y,
@@ -75,4 +73,4 @@ class PineconeDb(VectorDb):
         pcqr = PineconeQueryResponse(**query_response.to_dict())
         filtered_matches = self.filter_query(pcqr, city_data)
         match_cities = self.transform_match(filtered_matches)
-        print(match_cities)
+        return city_data, match_cities

@@ -1,9 +1,7 @@
 from pathlib import Path
 from fastapi import HTTPException, status
 import rasterio
-import numpy as np
 import pandas as pd
-import pywikibot as pwb
 
 from cities.schemas import CityData
 
