@@ -8,6 +8,7 @@
 /.backup
 # testing
 /coverage
+/*.egg-info/
 
 /.backup
 

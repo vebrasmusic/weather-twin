@@ -234,9 +234,9 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.temp -
-                                results.matchCity.stats.temp
+                                results.matchCity.stats.temp,
                             ) *
-                              10
+                              10,
                         )}%`,
                       }}
                     ></div>
@@ -263,8 +263,8 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.humidity -
-                                results.matchCity.stats.humidity
-                            )
+                                results.matchCity.stats.humidity,
+                            ),
                         )}%`,
                       }}
                     ></div>
@@ -291,9 +291,9 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.windSpeed -
-                                results.matchCity.stats.windSpeed
+                                results.matchCity.stats.windSpeed,
                             ) *
-                              5
+                              5,
                         )}%`,
                       }}
                     ></div>
@@ -320,9 +320,9 @@ export default function WeatherTwin() {
                           100 -
                             Math.abs(
                               results.sourceCity.stats.rainfall -
-                                results.matchCity.stats.rainfall
+                                results.matchCity.stats.rainfall,
                             ) /
-                              5
+                              5,
                         )}%`,
                       }}
                     ></div>
