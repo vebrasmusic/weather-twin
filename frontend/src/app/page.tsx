@@ -7,89 +7,29 @@ import ClimateData from "@/components/weather/climate-data";
 import ShareMenu from "@/components/weather/share-menu";
 import AnimatedBackground from "@/components/weather/animated-background";
 import SearchInput from "@/components/weather/search-input";
+import axios, { AxiosResponse } from "axios";
+import { WeatherTwinResponse } from "@/lib/types";
+import { toast } from "sonner";
 
 export default function WeatherTwin() {
-  const [city, setCity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<{
-    sourceCity: {
-      name: string;
-      lat: number;
-      lng: number;
-      country: string;
-      stats: {
-        temp: number;
-        humidity: number;
-        windSpeed: number;
-        rainfall: number;
-      };
-      koppen: string;
-      koppenFull: string;
-    };
-    matchCity: {
-      name: string;
-      lat: number;
-      lng: number;
-      country: string;
-      climate: string;
-      description: string;
-      stats: {
-        temp: number;
-        humidity: number;
-        windSpeed: number;
-        rainfall: number;
-      };
-      matchPercentage: number;
-      koppen: string;
-      koppenFull: string;
-    };
-  } | null>(null);
+  const [results, setResults] = useState<WeatherTwinResponse | null>(null);
 
-  const handleSearch = (cityName: string) => {
+  const handleSearch = async (cityName: string) => {
     if (!cityName.trim()) return;
 
-    setCity(cityName);
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Mock data - in a real app, this would come from your API
-      setResults({
-        sourceCity: {
-          name: cityName,
-          lat: 32.7157,
-          lng: -117.1611,
-          country: "United States",
-          stats: {
-            temp: 22,
-            humidity: 65,
-            windSpeed: 12,
-            rainfall: 260,
-          },
-          koppen: "Csa",
-          koppenFull: "Mediterranean hot summer climate",
-        },
-        matchCity: {
-          name: "Casablanca",
-          lat: 33.5731,
-          lng: -7.5898,
-          country: "Morocco",
-          climate: "Mediterranean",
-          description:
-            "Casablanca has a Mediterranean climate with mild, wet winters and hot, dry summers. The average temperature ranges from 12°C (54°F) in winter to 23°C (73°F) in summer, similar to coastal Southern California.",
-          stats: {
-            temp: 21,
-            humidity: 70,
-            windSpeed: 14,
-            rainfall: 280,
-          },
-          matchPercentage: 92,
-          koppen: "Csa",
-          koppenFull: "Mediterranean hot summer climate",
-        },
-      });
+    try {
+      const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
+        `http://127.0.0.1:8000/api/matches?city_name=${cityName}`,
+      );
       setIsLoading(false);
-    }, 1500);
+      setResults(response.data);
+    } catch (e) {
+      console.log("There was an error:", e);
+      setIsLoading(false);
+      toast.error("Something went wrong :(");
+    }
   };
 
   return (
@@ -115,10 +55,6 @@ export default function WeatherTwin() {
             <p className="text-gray-500 text-sm text-center max-w-md mx-auto">
               Find cities around the world with climates matching your own.
             </p>
-            <p className="text-gray-500 text-sm text-center max-w-md mx-auto mt-4">
-              Disclaimer: This is using mock data right now as we build out the
-              backend.
-            </p>
           </div>
         </div>
       ) : (
@@ -132,7 +68,6 @@ export default function WeatherTwin() {
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </button>
-
               <ShareMenu />
             </div>
 
@@ -140,17 +75,17 @@ export default function WeatherTwin() {
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-light text-white">
-                    {results.sourceCity.name}
+                    {results.input.metadata.city}
                   </h2>
                   <div className="text-xs text-gray-500 font-mono">
-                    {results.sourceCity.country}
+                    {results.input.metadata.country}
                   </div>
                 </div>
 
                 <div className="aspect-video relative overflow-hidden mb-3">
                   <MapComponent
-                    lat={results.sourceCity.lat}
-                    lng={results.sourceCity.lng}
+                    lat={results.input.metadata.lat}
+                    lng={results.input.metadata.lng}
                     zoom={10}
                     mapStyle="dark"
                   />
@@ -158,35 +93,35 @@ export default function WeatherTwin() {
 
                 <div className="flex items-center mb-3">
                   <div className="text-xs py-1 px-2 bg-[#041008] text-gray-400 font-mono">
-                    {results.sourceCity.koppen}
+                    {results.input.metadata.koppen_code}
                   </div>
                   <div className="text-xs text-gray-500 ml-2">
-                    {results.sourceCity.koppenFull}
+                    {results.input.metadata.koppen_description}
                   </div>
                 </div>
 
-                <ClimateData stats={results.sourceCity.stats} />
+                {/* <ClimateData stats={results.input.metadata.stats} /> */}
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-light text-white">
-                    {results.matchCity.name}
+                    {results.matches[0].metadata.city}
                   </h2>
                   <div className="flex items-center gap-2">
                     <div className="text-xs text-gray-500 font-mono">
-                      {results.matchCity.country}
+                      {results.matches[0].metadata.country}
                     </div>
-                    <div className="text-xs py-0.5 px-2 bg-[#041008] text-gray-400 font-mono">
-                      {results.matchCity.matchPercentage}% Match
-                    </div>
+                    {/* <div className="text-xs py-0.5 px-2 bg-[#041008] text-gray-400 font-mono"> */}
+                    {/*   {results.matches[0].metadata.matchPercentage}% Match */}
+                    {/* </div> */}
                   </div>
                 </div>
 
                 <div className="aspect-video relative overflow-hidden mb-3">
                   <MapComponent
-                    lat={results.matchCity.lat}
-                    lng={results.matchCity.lng}
+                    lat={results.matches[0].metadata.lat}
+                    lng={results.matches[0].metadata.lng}
                     zoom={10}
                     mapStyle="dark"
                   />
@@ -194,142 +129,142 @@ export default function WeatherTwin() {
 
                 <div className="flex items-center mb-3">
                   <div className="text-xs py-1 px-2 bg-[#041008] text-gray-400 font-mono">
-                    {results.matchCity.koppen}
+                    {results.matches[0].metadata.koppen_code}
                   </div>
                   <div className="text-xs text-gray-500 ml-2">
-                    {results.matchCity.koppenFull}
+                    {results.matches[0].metadata.koppen_description}
                   </div>
                 </div>
 
-                <ClimateData stats={results.matchCity.stats} />
+                {/* <ClimateData stats={results.matches[0].metadata.stats} /> */}
 
-                <div className="mt-4 text-sm text-gray-400 leading-relaxed">
-                  {results.matchCity.description}
-                </div>
+                {/* <div className="mt-4 text-sm text-gray-400 leading-relaxed"> */}
+                {/*   {results.matches[0].metadata.description} */}
+                {/* </div> */}
               </div>
             </div>
 
-            <div className="mt-8 pt-6 border-t border-[#0A1A0A]">
-              <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4 font-mono">
-                Climate Comparison
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                <div className="space-y-2">
-                  <div className="text-xs text-gray-600 font-mono">
-                    Temperature
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-mono">
-                      {results.sourceCity.stats.temp}°C
-                    </span>
-                    <span className="text-white font-mono">
-                      {results.matchCity.stats.temp}°C
-                    </span>
-                  </div>
-                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
-                    <div
-                      className="h-full bg-gray-500"
-                      style={{
-                        width: `${Math.abs(
-                          100 -
-                            Math.abs(
-                              results.sourceCity.stats.temp -
-                                results.matchCity.stats.temp,
-                            ) *
-                              10,
-                        )}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-xs text-gray-600 font-mono">
-                    Humidity
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-mono">
-                      {results.sourceCity.stats.humidity}%
-                    </span>
-                    <span className="text-white font-mono">
-                      {results.matchCity.stats.humidity}%
-                    </span>
-                  </div>
-                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
-                    <div
-                      className="h-full bg-gray-500"
-                      style={{
-                        width: `${Math.abs(
-                          100 -
-                            Math.abs(
-                              results.sourceCity.stats.humidity -
-                                results.matchCity.stats.humidity,
-                            ),
-                        )}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-xs text-gray-600 font-mono">
-                    Wind Speed
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-mono">
-                      {results.sourceCity.stats.windSpeed} km/h
-                    </span>
-                    <span className="text-white font-mono">
-                      {results.matchCity.stats.windSpeed} km/h
-                    </span>
-                  </div>
-                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
-                    <div
-                      className="h-full bg-gray-500"
-                      style={{
-                        width: `${Math.abs(
-                          100 -
-                            Math.abs(
-                              results.sourceCity.stats.windSpeed -
-                                results.matchCity.stats.windSpeed,
-                            ) *
-                              5,
-                        )}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="text-xs text-gray-600 font-mono">
-                    Annual Rainfall
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-white font-mono">
-                      {results.sourceCity.stats.rainfall} mm
-                    </span>
-                    <span className="text-white font-mono">
-                      {results.matchCity.stats.rainfall} mm
-                    </span>
-                  </div>
-                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
-                    <div
-                      className="h-full bg-gray-500"
-                      style={{
-                        width: `${Math.abs(
-                          100 -
-                            Math.abs(
-                              results.sourceCity.stats.rainfall -
-                                results.matchCity.stats.rainfall,
-                            ) /
-                              5,
-                        )}%`,
-                      }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* <div className="mt-8 pt-6 border-t border-[#0A1A0A]"> */}
+            {/*   <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4 font-mono"> */}
+            {/*     Climate Comparison */}
+            {/*   </h3> */}
+            {/*   <div className="grid grid-cols-2 md:grid-cols-4 gap-6"> */}
+            {/*     <div className="space-y-2"> */}
+            {/*       <div className="text-xs text-gray-600 font-mono"> */}
+            {/*         Temperature */}
+            {/*       </div> */}
+            {/*       <div className="flex items-center justify-between"> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.input.metadata.stats.temp}°C */}
+            {/*         </span> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.matches[0].metadata.stats.temp}°C */}
+            {/*         </span> */}
+            {/*       </div> */}
+            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
+            {/*         <div */}
+            {/*           className="h-full bg-gray-500" */}
+            {/*           style={{ */}
+            {/*             width: `${Math.abs( */}
+            {/*               100 - */}
+            {/*                 Math.abs( */}
+            {/*                   results.input.metadata.stats.temp - */}
+            {/*                     results.matches[0].metadata.stats.temp, */}
+            {/*                 ) * */}
+            {/*                   10, */}
+            {/*             )}%`, */}
+            {/*           }} */}
+            {/*         ></div> */}
+            {/*       </div> */}
+            {/*     </div> */}
+            {/**/}
+            {/*     <div className="space-y-2"> */}
+            {/*       <div className="text-xs text-gray-600 font-mono"> */}
+            {/*         Humidity */}
+            {/*       </div> */}
+            {/*       <div className="flex items-center justify-between"> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.input.metadata.stats.humidity}% */}
+            {/*         </span> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.matches[0].metadata.stats.humidity}% */}
+            {/*         </span> */}
+            {/*       </div> */}
+            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
+            {/*         <div */}
+            {/*           className="h-full bg-gray-500" */}
+            {/*           style={{ */}
+            {/*             width: `${Math.abs( */}
+            {/*               100 - */}
+            {/*                 Math.abs( */}
+            {/*                   results.input.metadata.stats.humidity - */}
+            {/*                     results.matches[0].metadata.stats.humidity, */}
+            {/*                 ), */}
+            {/*             )}%`, */}
+            {/*           }} */}
+            {/*         ></div> */}
+            {/*       </div> */}
+            {/*     </div> */}
+            {/**/}
+            {/*     <div className="space-y-2"> */}
+            {/*       <div className="text-xs text-gray-600 font-mono"> */}
+            {/*         Wind Speed */}
+            {/*       </div> */}
+            {/*       <div className="flex items-center justify-between"> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.input.metadata.stats.windSpeed} km/h */}
+            {/*         </span> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.matches[0].metadata.stats.windSpeed} km/h */}
+            {/*         </span> */}
+            {/*       </div> */}
+            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
+            {/*         <div */}
+            {/*           className="h-full bg-gray-500" */}
+            {/*           style={{ */}
+            {/*             width: `${Math.abs( */}
+            {/*               100 - */}
+            {/*                 Math.abs( */}
+            {/*                   results.input.metadata.stats.windSpeed - */}
+            {/*                     results.matches[0].metadata.stats.windSpeed, */}
+            {/*                 ) * */}
+            {/*                   5, */}
+            {/*             )}%`, */}
+            {/*           }} */}
+            {/*         ></div> */}
+            {/*       </div> */}
+            {/*     </div> */}
+            {/**/}
+            {/*     <div className="space-y-2"> */}
+            {/*       <div className="text-xs text-gray-600 font-mono"> */}
+            {/*         Annual Rainfall */}
+            {/*       </div> */}
+            {/*       <div className="flex items-center justify-between"> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.input.metadata.stats.rainfall} mm */}
+            {/*         </span> */}
+            {/*         <span className="text-white font-mono"> */}
+            {/*           {results.matches[0].metadata.stats.rainfall} mm */}
+            {/*         </span> */}
+            {/*       </div> */}
+            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
+            {/*         <div */}
+            {/*           className="h-full bg-gray-500" */}
+            {/*           style={{ */}
+            {/*             width: `${Math.abs( */}
+            {/*               100 - */}
+            {/*                 Math.abs( */}
+            {/*                   results.input.metadata.stats.rainfall - */}
+            {/*                     results.matches[0].metadata.stats.rainfall, */}
+            {/*                 ) / */}
+            {/*                   5, */}
+            {/*             )}%`, */}
+            {/*           }} */}
+            {/*         ></div> */}
+            {/*       </div> */}
+            {/*     </div> */}
+            {/*   </div> */}
+            {/* </div> */}
 
             <footer className="mt-16 text-center text-xs text-gray-700 font-mono">
               <p>Made by Andrés Duvvuri</p>
