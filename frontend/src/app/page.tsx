@@ -21,7 +21,7 @@ export default function WeatherTwin() {
     setIsLoading(true);
     try {
       const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
-        `http://127.0.0.1:8000/api/matches?city_name=${cityName}`,
+        `http://127.0.0.1:8000/api/matches?city_name=${cityName}`
       );
       setIsLoading(false);
       setResults(response.data);
@@ -100,7 +100,7 @@ export default function WeatherTwin() {
                   </div>
                 </div>
 
-                {/* <ClimateData stats={results.input.metadata.stats} /> */}
+                <ClimateData stats={results.input.metadata.stats} />
               </div>
 
               <div>
@@ -112,9 +112,6 @@ export default function WeatherTwin() {
                     <div className="text-xs text-gray-500 font-mono">
                       {results.matches[0].metadata.country}
                     </div>
-                    {/* <div className="text-xs py-0.5 px-2 bg-[#041008] text-gray-400 font-mono"> */}
-                    {/*   {results.matches[0].metadata.matchPercentage}% Match */}
-                    {/* </div> */}
                   </div>
                 </div>
 
@@ -136,7 +133,7 @@ export default function WeatherTwin() {
                   </div>
                 </div>
 
-                {/* <ClimateData stats={results.matches[0].metadata.stats} /> */}
+                <ClimateData stats={results.matches[0].metadata.stats} />
 
                 {/* <div className="mt-4 text-sm text-gray-400 leading-relaxed"> */}
                 {/*   {results.matches[0].metadata.description} */}
@@ -144,127 +141,178 @@ export default function WeatherTwin() {
               </div>
             </div>
 
-            {/* <div className="mt-8 pt-6 border-t border-[#0A1A0A]"> */}
-            {/*   <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4 font-mono"> */}
-            {/*     Climate Comparison */}
-            {/*   </h3> */}
-            {/*   <div className="grid grid-cols-2 md:grid-cols-4 gap-6"> */}
-            {/*     <div className="space-y-2"> */}
-            {/*       <div className="text-xs text-gray-600 font-mono"> */}
-            {/*         Temperature */}
-            {/*       </div> */}
-            {/*       <div className="flex items-center justify-between"> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.input.metadata.stats.temp}°C */}
-            {/*         </span> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.matches[0].metadata.stats.temp}°C */}
-            {/*         </span> */}
-            {/*       </div> */}
-            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
-            {/*         <div */}
-            {/*           className="h-full bg-gray-500" */}
-            {/*           style={{ */}
-            {/*             width: `${Math.abs( */}
-            {/*               100 - */}
-            {/*                 Math.abs( */}
-            {/*                   results.input.metadata.stats.temp - */}
-            {/*                     results.matches[0].metadata.stats.temp, */}
-            {/*                 ) * */}
-            {/*                   10, */}
-            {/*             )}%`, */}
-            {/*           }} */}
-            {/*         ></div> */}
-            {/*       </div> */}
-            {/*     </div> */}
-            {/**/}
-            {/*     <div className="space-y-2"> */}
-            {/*       <div className="text-xs text-gray-600 font-mono"> */}
-            {/*         Humidity */}
-            {/*       </div> */}
-            {/*       <div className="flex items-center justify-between"> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.input.metadata.stats.humidity}% */}
-            {/*         </span> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.matches[0].metadata.stats.humidity}% */}
-            {/*         </span> */}
-            {/*       </div> */}
-            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
-            {/*         <div */}
-            {/*           className="h-full bg-gray-500" */}
-            {/*           style={{ */}
-            {/*             width: `${Math.abs( */}
-            {/*               100 - */}
-            {/*                 Math.abs( */}
-            {/*                   results.input.metadata.stats.humidity - */}
-            {/*                     results.matches[0].metadata.stats.humidity, */}
-            {/*                 ), */}
-            {/*             )}%`, */}
-            {/*           }} */}
-            {/*         ></div> */}
-            {/*       </div> */}
-            {/*     </div> */}
-            {/**/}
-            {/*     <div className="space-y-2"> */}
-            {/*       <div className="text-xs text-gray-600 font-mono"> */}
-            {/*         Wind Speed */}
-            {/*       </div> */}
-            {/*       <div className="flex items-center justify-between"> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.input.metadata.stats.windSpeed} km/h */}
-            {/*         </span> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.matches[0].metadata.stats.windSpeed} km/h */}
-            {/*         </span> */}
-            {/*       </div> */}
-            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
-            {/*         <div */}
-            {/*           className="h-full bg-gray-500" */}
-            {/*           style={{ */}
-            {/*             width: `${Math.abs( */}
-            {/*               100 - */}
-            {/*                 Math.abs( */}
-            {/*                   results.input.metadata.stats.windSpeed - */}
-            {/*                     results.matches[0].metadata.stats.windSpeed, */}
-            {/*                 ) * */}
-            {/*                   5, */}
-            {/*             )}%`, */}
-            {/*           }} */}
-            {/*         ></div> */}
-            {/*       </div> */}
-            {/*     </div> */}
-            {/**/}
-            {/*     <div className="space-y-2"> */}
-            {/*       <div className="text-xs text-gray-600 font-mono"> */}
-            {/*         Annual Rainfall */}
-            {/*       </div> */}
-            {/*       <div className="flex items-center justify-between"> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.input.metadata.stats.rainfall} mm */}
-            {/*         </span> */}
-            {/*         <span className="text-white font-mono"> */}
-            {/*           {results.matches[0].metadata.stats.rainfall} mm */}
-            {/*         </span> */}
-            {/*       </div> */}
-            {/*       <div className="h-px bg-[#0A1A0A] overflow-hidden"> */}
-            {/*         <div */}
-            {/*           className="h-full bg-gray-500" */}
-            {/*           style={{ */}
-            {/*             width: `${Math.abs( */}
-            {/*               100 - */}
-            {/*                 Math.abs( */}
-            {/*                   results.input.metadata.stats.rainfall - */}
-            {/*                     results.matches[0].metadata.stats.rainfall, */}
-            {/*                 ) / */}
-            {/*                   5, */}
-            {/*             )}%`, */}
-            {/*           }} */}
-            {/*         ></div> */}
-            {/*       </div> */}
-            {/*     </div> */}
-            {/*   </div> */}
-            {/* </div> */}
+            <div className="mt-8 pt-6 border-t border-[#0A1A0A]">
+              <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4 font-mono">
+                Climate Comparison
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-600 font-mono">
+                    Temperature
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-mono">
+                      {results.input.metadata.stats.temp
+                        ? `${results.input.metadata.stats.temp[0]}°C - ${results.input.metadata.stats.temp[1]}°C`
+                        : "No data"}
+                    </span>
+                    <span className="text-white font-mono">
+                      {results.matches[0].metadata.stats.temp
+                        ? `${results.matches[0].metadata.stats.temp[0]}°C - ${results.matches[0].metadata.stats.temp[1]}°C`
+                        : "No data"}
+                    </span>
+                  </div>
+                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
+                    <div
+                      className="h-full bg-gray-500"
+                      style={{
+                        width: `${Math.abs(
+                          100 -
+                            Math.abs(
+                              (results.input.metadata.stats.temp
+                                ? (results.input.metadata.stats.temp[0] +
+                                    results.input.metadata.stats.temp[1]) /
+                                  2
+                                : 0) -
+                                (results.matches[0].metadata.stats.temp
+                                  ? (results.matches[0].metadata.stats.temp[0] +
+                                      results.matches[0].metadata.stats
+                                        .temp[1]) /
+                                    2
+                                  : 0)
+                            ) *
+                              10
+                        )}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-600 font-mono">
+                    Pressure
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-mono">
+                      {results.input.metadata.stats.pressure
+                        ? `${results.input.metadata.stats.pressure[0]} hPa - ${results.input.metadata.stats.pressure[1]} hPa`
+                        : "No data"}
+                    </span>
+                    <span className="text-white font-mono">
+                      {results.matches[0].metadata.stats.pressure
+                        ? `${results.matches[0].metadata.stats.pressure[0]} hPa - ${results.matches[0].metadata.stats.pressure[1]} hPa`
+                        : "No data"}
+                    </span>
+                  </div>
+                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
+                    <div
+                      className="h-full bg-gray-500"
+                      style={{
+                        width: `${Math.abs(
+                          100 -
+                            Math.abs(
+                              (results.input.metadata.stats.pressure
+                                ? (results.input.metadata.stats.pressure[0] +
+                                    results.input.metadata.stats.pressure[1]) /
+                                  2
+                                : 0) -
+                                (results.matches[0].metadata.stats.pressure
+                                  ? (results.matches[0].metadata.stats
+                                      .pressure[0] +
+                                      results.matches[0].metadata.stats
+                                        .pressure[1]) /
+                                    2
+                                  : 0)
+                            )
+                        )}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-600 font-mono">
+                    Wind Speed
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-mono">
+                      {results.input.metadata.stats.windspeed
+                        ? `${results.input.metadata.stats.windspeed[0]} km/h - ${results.input.metadata.stats.windspeed[1]} km/h`
+                        : "No data"}
+                    </span>
+                    <span className="text-white font-mono">
+                      {results.matches[0].metadata.stats.windspeed
+                        ? `${results.matches[0].metadata.stats.windspeed[0]} km/h - ${results.matches[0].metadata.stats.windspeed[1]} km/h`
+                        : "No data"}
+                    </span>
+                  </div>
+                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
+                    <div
+                      className="h-full bg-gray-500"
+                      style={{
+                        width: `${Math.abs(
+                          100 -
+                            Math.abs(
+                              ((results.input.metadata.stats.windspeed?.[0] ??
+                                0) +
+                                (results.input.metadata.stats.windspeed?.[1] ??
+                                  0)) /
+                                2 -
+                                ((results.matches[0].metadata.stats
+                                  .windspeed?.[0] ?? 0) +
+                                  (results.matches[0].metadata.stats
+                                    .windspeed?.[1] ?? 0)) /
+                                  2
+                            ) *
+                              5
+                        )}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="text-xs text-gray-600 font-mono">
+                    Annual Rainfall
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-white font-mono">
+                      {results.input.metadata.stats.rainfall
+                        ? `${results.input.metadata.stats.rainfall[0]} mm - ${results.input.metadata.stats.rainfall[1]} mm`
+                        : "No data"}
+                    </span>
+                    <span className="text-white font-mono">
+                      {results.matches[0].metadata.stats.rainfall
+                        ? `${results.matches[0].metadata.stats.rainfall[0]} mm - ${results.matches[0].metadata.stats.rainfall[1]} mm`
+                        : "No data"}
+                    </span>
+                  </div>
+                  <div className="h-px bg-[#0A1A0A] overflow-hidden">
+                    <div
+                      className="h-full bg-gray-500"
+                      style={{
+                        width: `${Math.abs(
+                          100 -
+                            Math.abs(
+                              ((results.input.metadata.stats.rainfall?.[0] ??
+                                0) +
+                                (results.input.metadata.stats.rainfall?.[1] ??
+                                  0)) /
+                                2 -
+                                ((results.matches[0].metadata.stats
+                                  .rainfall?.[0] ?? 0) +
+                                  (results.matches[0].metadata.stats
+                                    .rainfall?.[1] ?? 0)) /
+                                  2
+                            ) *
+                              5
+                        )}%`,
+                      }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <footer className="mt-16 text-center text-xs text-gray-700 font-mono">
               <p>Made by Andrés Duvvuri</p>

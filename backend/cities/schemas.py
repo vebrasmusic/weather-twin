@@ -15,6 +15,13 @@ class Embeddings(BaseModel):
     embed_z: float
 
 
+class Stats(BaseModel):
+    windspeed: list[float] | None = None
+    pressure: list[float] | None = None
+    temp: list[float] | None = None
+    rainfall: list[float] | None = None
+
+
 class CityMeta(BaseModel):
     """
     Represents a city's metadata, including hte output cities.
@@ -26,6 +33,7 @@ class CityMeta(BaseModel):
     koppen_code: str
     koppen_description: str
     country: str | None = None
+    stats: Stats | None = None
 
 
 class CityData(BaseModel):
