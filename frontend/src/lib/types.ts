@@ -17,6 +17,7 @@ export type CityMeta = {
   koppen_description: string;
   country: string | null;
   stats: Stats;
+  description: string | null;
 };
 export type CityData = {
   embeddings: Embeddings;

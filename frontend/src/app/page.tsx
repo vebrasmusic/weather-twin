@@ -101,6 +101,11 @@ export default function WeatherTwin() {
                 </div>
 
                 <ClimateData stats={results.input.metadata.stats} />
+
+                <div className="mt-4 text-sm text-gray-400 leading-relaxed">
+                  {results.input.metadata.description ||
+                    "No description found."}
+                </div>
               </div>
 
               <div>
@@ -135,9 +140,9 @@ export default function WeatherTwin() {
 
                 <ClimateData stats={results.matches[0].metadata.stats} />
 
-                {/* <div className="mt-4 text-sm text-gray-400 leading-relaxed"> */}
-                {/*   {results.matches[0].metadata.description} */}
-                {/* </div> */}
+                <div className="mt-4 text-sm text-gray-400 leading-relaxed">
+                  {results.matches[0].metadata.description}
+                </div>
               </div>
             </div>
 
@@ -153,12 +158,20 @@ export default function WeatherTwin() {
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
                       {results.input.metadata.stats.temp
-                        ? `${results.input.metadata.stats.temp[0]}°C - ${results.input.metadata.stats.temp[1]}°C`
+                        ? `${(
+                            (results.input.metadata.stats.temp[0] +
+                              results.input.metadata.stats.temp[1]) /
+                            2
+                          ).toFixed(1)}°C`
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
                       {results.matches[0].metadata.stats.temp
-                        ? `${results.matches[0].metadata.stats.temp[0]}°C - ${results.matches[0].metadata.stats.temp[1]}°C`
+                        ? `${(
+                            (results.matches[0].metadata.stats.temp[0] +
+                              results.matches[0].metadata.stats.temp[1]) /
+                            2
+                          ).toFixed(1)}°C`
                         : "No data"}
                     </span>
                   </div>
@@ -195,12 +208,20 @@ export default function WeatherTwin() {
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
                       {results.input.metadata.stats.pressure
-                        ? `${results.input.metadata.stats.pressure[0]} hPa - ${results.input.metadata.stats.pressure[1]} hPa`
+                        ? `${(
+                            (results.input.metadata.stats.pressure[0] +
+                              results.input.metadata.stats.pressure[1]) /
+                            2
+                          ).toFixed(1)} hPa`
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
                       {results.matches[0].metadata.stats.pressure
-                        ? `${results.matches[0].metadata.stats.pressure[0]} hPa - ${results.matches[0].metadata.stats.pressure[1]} hPa`
+                        ? `${(
+                            (results.matches[0].metadata.stats.pressure[0] +
+                              results.matches[0].metadata.stats.pressure[1]) /
+                            2
+                          ).toFixed(1)} hPa`
                         : "No data"}
                     </span>
                   </div>
@@ -237,12 +258,20 @@ export default function WeatherTwin() {
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
                       {results.input.metadata.stats.windspeed
-                        ? `${results.input.metadata.stats.windspeed[0]} km/h - ${results.input.metadata.stats.windspeed[1]} km/h`
+                        ? `${(
+                            (results.input.metadata.stats.windspeed[0] +
+                              results.input.metadata.stats.windspeed[1]) /
+                            2
+                          ).toFixed(1)} km/h`
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
                       {results.matches[0].metadata.stats.windspeed
-                        ? `${results.matches[0].metadata.stats.windspeed[0]} km/h - ${results.matches[0].metadata.stats.windspeed[1]} km/h`
+                        ? `${(
+                            (results.matches[0].metadata.stats.windspeed[0] +
+                              results.matches[0].metadata.stats.windspeed[1]) /
+                            2
+                          ).toFixed(1)} km/h`
                         : "No data"}
                     </span>
                   </div>
@@ -278,12 +307,20 @@ export default function WeatherTwin() {
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
                       {results.input.metadata.stats.rainfall
-                        ? `${results.input.metadata.stats.rainfall[0]} mm - ${results.input.metadata.stats.rainfall[1]} mm`
+                        ? `${(
+                            (results.input.metadata.stats.rainfall[0] +
+                              results.input.metadata.stats.rainfall[1]) /
+                            2
+                          ).toFixed(1)} mm`
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
                       {results.matches[0].metadata.stats.rainfall
-                        ? `${results.matches[0].metadata.stats.rainfall[0]} mm - ${results.matches[0].metadata.stats.rainfall[1]} mm`
+                        ? `${(
+                            (results.matches[0].metadata.stats.rainfall[0] +
+                              results.matches[0].metadata.stats.rainfall[1]) /
+                            2
+                          ).toFixed(1)} mm`
                         : "No data"}
                     </span>
                   </div>

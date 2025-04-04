@@ -34,6 +34,7 @@ class CityMeta(BaseModel):
     koppen_description: str
     country: str | None = None
     stats: Stats | None = None
+    description: str | None = None
 
 
 class CityData(BaseModel):

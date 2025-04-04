@@ -27,7 +27,9 @@ export default function ClimateData({ stats }: ClimateDataProps) {
         </div>
         <div className="text-sm font-mono">
           {stats.pressure != null
-            ? `${stats.pressure[0]} - ${stats.pressure[1]} hPa`
+            ? `${stats.pressure[0].toFixed(0)} - ${stats.pressure[1].toFixed(
+                0
+              )} hPa`
             : "No data"}
         </div>
       </div>

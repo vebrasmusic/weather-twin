@@ -1,5 +1,6 @@
 from geopy import Nominatim
 from meteostat import Normals, Stations
+import requests
 from cities.schemas import Address, CityData, PlaceResponse, Stats, WeatherTwinResponse
 import pycountry
 
@@ -12,6 +13,7 @@ def attach_meta(city_data: CityData) -> CityData:
     if stats is not None:
         stats = Stats(**stats)
         city_data.metadata.stats = stats
+    city_data.metadata.description = fetch_description(city_data)
     return city_data
 
 
@@ -53,6 +55,20 @@ def fetch_weather(city_data: CityData):
         "windspeed": safe_stat("wspd"),
     }
     return stats
+
+
+def fetch_description(city_data: CityData):
+    url = (
+        "https://en.wikipedia.org/api/rest_v1/page/summary/"
+        + city_data.metadata.city.replace(" ", "_")
+    )
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        return data.get("extract", "No summary found.")
+    else:
+        return "Could not fetch summary."
 
 
 #
