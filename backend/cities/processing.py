@@ -5,6 +5,8 @@ import pandas as pd
 import pickle
 from pathlib import Path
 
+from cities.websocket import ConnectionManager
+
 
 class Processing:
     def __init__(self, city_name: str):

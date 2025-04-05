@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import MapComponent from "@/components/weather/map-component";
 import ClimateData from "@/components/weather/climate-data";
@@ -9,28 +9,57 @@ import SearchInput from "@/components/weather/search-input";
 import axios, { AxiosResponse } from "axios";
 import { WeatherTwinResponse } from "@/lib/types";
 import { toast } from "sonner";
-import { baseUrl } from "@/lib/url";
+import { baseUrl, socketUrl } from "@/lib/url";
+import { v4 as uuidv4 } from "uuid";
+import useWebSocket, { ReadyState } from "react-use-websocket";
 
 export default function WeatherTwin() {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<WeatherTwinResponse | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
+
+  const fullSocketUrl = useMemo(() => {
+    if (!requestId) return null;
+
+    return socketUrl + `?request_id=${requestId}`;
+  }, [requestId]);
+
+  const { lastMessage } = useWebSocket(
+    fullSocketUrl,
+    {
+      onOpen: async () => {
+        try {
+          const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
+            `${baseUrl}/matches`,
+            {
+              params: {
+                city_name: city,
+                request_id: requestId,
+              },
+            },
+          );
+          setIsLoading(false);
+          setResults(response.data);
+        } catch (e) {
+          console.log("There was an error:", e);
+          setIsLoading(false);
+          toast.error("Something went wrong :(");
+        }
+      },
+    },
+    !!requestId,
+  );
 
   const handleSearch = async (cityName: string) => {
     if (!cityName.trim()) return;
-
+    const newRequestId = uuidv4();
+    setRequestId(newRequestId);
     setIsLoading(true);
-    try {
-      const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
-        `${baseUrl}/matches?city_name=${cityName}`,
-      );
-      setIsLoading(false);
-      setResults(response.data);
-    } catch (e) {
-      console.log("There was an error:", e);
-      setIsLoading(false);
-      toast.error("Something went wrong :(");
-    }
+    setCity(cityName);
   };
+
+  useEffect(() => console.log(lastMessage), [lastMessage]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-[#050806] to-[#041008] text-white">
@@ -45,7 +74,11 @@ export default function WeatherTwin() {
                 </h1>
 
                 <div className="relative">
-                  <SearchInput onSearch={handleSearch} isLoading={isLoading} />
+                  <SearchInput
+                    onSearch={handleSearch}
+                    isLoading={isLoading}
+                    loadingText={lastMessage?.data}
+                  />
                 </div>
               </div>
             </div>
