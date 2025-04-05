@@ -11,10 +11,12 @@
   "dependencies": {
     "@icons-pack/react-simple-icons": "^12.2.0",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-scroll-area": "^1.2.3",
     "@radix-ui/react-slot": "^1.1.2",
     "axios": "^1.8.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "immer": "^10.1.1",
     "lucide-react": "^0.479.0",
     "maplibre-gl": "^5.2.0",
     "next": "15.2.2",
@@ -26,6 +28,7 @@
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7",
+    "use-immer": "^0.11.0",
     "uuid": "^11.1.0"
   },
   "devDependencies": {

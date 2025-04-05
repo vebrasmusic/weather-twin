@@ -42,7 +42,7 @@ class Processing:
         if normals_data is None or normals_data.empty:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
-                "No climate data found for station",
+                "No climate data found for station.",
             )
         if "month" not in normals_data.columns and len(normals_data) == 12:
             normals_data["month"] = list(range(1, 13))

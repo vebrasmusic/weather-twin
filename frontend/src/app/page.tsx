@@ -1,23 +1,28 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import MapComponent from "@/components/weather/map-component";
 import ClimateData from "@/components/weather/climate-data";
 import ShareMenu from "@/components/weather/share-menu";
 import AnimatedBackground from "@/components/weather/animated-background";
 import SearchInput from "@/components/weather/search-input";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { WeatherTwinResponse } from "@/lib/types";
 import { toast } from "sonner";
 import { baseUrl, socketUrl } from "@/lib/url";
 import { v4 as uuidv4 } from "uuid";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { calculateKoppenSimilarity } from "@/lib/utils";
+import { useImmer } from "use-immer";
+import { Button } from "@/components/ui/button";
 
 export default function WeatherTwin() {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<WeatherTwinResponse | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const [city, setCity] = useState<string | null>(null);
+  const [currentMatch, setCurrentMatch] = useImmer(0);
 
   const fullSocketUrl = useMemo(() => {
     if (!requestId) return null;
@@ -44,7 +49,16 @@ export default function WeatherTwin() {
         } catch (e) {
           console.log("There was an error:", e);
           setIsLoading(false);
-          toast.error("Something went wrong :(");
+          if (axios.isAxiosError(e)) {
+            const msg = e.response?.data.detail;
+            if (msg === "No climate data found for station.") {
+              toast.error("Couldn't find any data for that city, try another!");
+            } else {
+              toast.error("Something went wrong :(");
+            }
+          } else {
+            toast.error("Unexpected error");
+          }
         }
       },
     },
@@ -58,8 +72,6 @@ export default function WeatherTwin() {
     setIsLoading(true);
     setCity(cityName);
   };
-
-  useEffect(() => console.log(lastMessage), [lastMessage]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-[#050806] to-[#041008] text-white">
@@ -95,7 +107,10 @@ export default function WeatherTwin() {
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex justify-between items-center mb-6">
               <button
-                onClick={() => setResults(null)}
+                onClick={() => {
+                  setResults(null);
+                  setCurrentMatch(0);
+                }}
                 className="flex hover:cursor-pointer items-center text-sm text-gray-400 hover:text-gray-300 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
@@ -103,12 +118,11 @@ export default function WeatherTwin() {
               </button>
               <ShareMenu />
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-light text-white">
-                    {results.input.metadata.city}
+                    <strong>{results.input.metadata.city}</strong>
                   </h2>
                   <div className="text-xs text-gray-500 font-mono">
                     {results.input.metadata.country}
@@ -135,28 +149,42 @@ export default function WeatherTwin() {
 
                 <ClimateData stats={results.input.metadata.stats} />
 
-                <div className="mt-4 text-sm text-gray-400 leading-relaxed">
-                  {results.input.metadata.description ||
-                    "No description found."}
-                </div>
+                <ScrollArea className="mt-4 text-sm text-gray-400 leading-relaxed h-30 mask-alpha mask-b-from-black mask-b-from-60% mask-b-to-transparent">
+                  {results.input.metadata.description ? (
+                    <>
+                      <p>{results.input.metadata.description}</p>
+                      <div className="h-8" /> {/* adds empty vertical space */}
+                    </>
+                  ) : (
+                    "No description."
+                  )}
+                </ScrollArea>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-xl font-light text-white">
-                    {results.matches[0].metadata.city}
+                  <h2 className="text-xl font-light text-gray-500">
+                    {`Match ${currentMatch + 1}`} (
+                    {calculateKoppenSimilarity(
+                      results.matches[currentMatch].metadata.koppen_code,
+                      results.input.metadata.koppen_code,
+                    )}
+                    % Similar):{" "}
+                    <strong className="text-white">
+                      {results.matches[currentMatch].metadata.city}
+                    </strong>
                   </h2>
                   <div className="flex items-center gap-2">
                     <div className="text-xs text-gray-500 font-mono">
-                      {results.matches[0].metadata.country}
+                      {results.matches[currentMatch].metadata.country}
                     </div>
                   </div>
                 </div>
 
                 <div className="aspect-video relative overflow-hidden mb-3">
                   <MapComponent
-                    lat={results.matches[0].metadata.lat}
-                    lng={results.matches[0].metadata.lng}
+                    lat={results.matches[currentMatch].metadata.lat}
+                    lng={results.matches[currentMatch].metadata.lng}
                     zoom={10}
                     mapStyle="dark"
                   />
@@ -164,21 +192,31 @@ export default function WeatherTwin() {
 
                 <div className="flex items-center mb-3">
                   <div className="text-xs py-1 px-2 bg-[#041008] text-gray-400 font-mono">
-                    {results.matches[0].metadata.koppen_code}
+                    {results.matches[currentMatch].metadata.koppen_code}
                   </div>
                   <div className="text-xs text-gray-500 ml-2">
-                    {results.matches[0].metadata.koppen_description}
+                    {results.matches[currentMatch].metadata.koppen_description}
                   </div>
                 </div>
 
-                <ClimateData stats={results.matches[0].metadata.stats} />
+                <ClimateData
+                  stats={results.matches[currentMatch].metadata.stats}
+                />
 
-                <div className="mt-4 text-sm text-gray-400 leading-relaxed">
-                  {results.matches[0].metadata.description}
-                </div>
+                <ScrollArea className="mt-4 text-sm text-gray-400 leading-relaxed h-30 mask-alpha mask-b-from-black mask-b-from-60% mask-b-to-transparent">
+                  {results.matches[currentMatch].metadata.description ? (
+                    <>
+                      <p>
+                        {results.matches[currentMatch].metadata.description}
+                      </p>
+                      <div className="h-8" /> {/* adds empty vertical space */}
+                    </>
+                  ) : (
+                    "No description."
+                  )}
+                </ScrollArea>
               </div>
             </div>
-
             <div className="mt-8 pt-6 border-t border-[#0A1A0A]">
               <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4 font-mono">
                 Climate Comparison
@@ -199,10 +237,12 @@ export default function WeatherTwin() {
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matches[0].metadata.stats.temp
+                      {results.matches[currentMatch].metadata.stats.temp
                         ? `${(
-                            (results.matches[0].metadata.stats.temp[0] +
-                              results.matches[0].metadata.stats.temp[1]) /
+                            (results.matches[currentMatch].metadata.stats
+                              .temp[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .temp[1]) /
                             2
                           ).toFixed(1)}°C`
                         : "No data"}
@@ -220,10 +260,12 @@ export default function WeatherTwin() {
                                     results.input.metadata.stats.temp[1]) /
                                   2
                                 : 0) -
-                                (results.matches[0].metadata.stats.temp
-                                  ? (results.matches[0].metadata.stats.temp[0] +
-                                      results.matches[0].metadata.stats
-                                        .temp[1]) /
+                                (results.matches[currentMatch].metadata.stats
+                                  .temp
+                                  ? (results.matches[currentMatch].metadata
+                                      .stats.temp[0] +
+                                      results.matches[currentMatch].metadata
+                                        .stats.temp[1]) /
                                     2
                                   : 0),
                             ) *
@@ -249,10 +291,12 @@ export default function WeatherTwin() {
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matches[0].metadata.stats.pressure
+                      {results.matches[currentMatch].metadata.stats.pressure
                         ? `${(
-                            (results.matches[0].metadata.stats.pressure[0] +
-                              results.matches[0].metadata.stats.pressure[1]) /
+                            (results.matches[currentMatch].metadata.stats
+                              .pressure[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .pressure[1]) /
                             2
                           ).toFixed(1)} hPa`
                         : "No data"}
@@ -270,11 +314,12 @@ export default function WeatherTwin() {
                                     results.input.metadata.stats.pressure[1]) /
                                   2
                                 : 0) -
-                                (results.matches[0].metadata.stats.pressure
-                                  ? (results.matches[0].metadata.stats
-                                      .pressure[0] +
-                                      results.matches[0].metadata.stats
-                                        .pressure[1]) /
+                                (results.matches[currentMatch].metadata.stats
+                                  .pressure
+                                  ? (results.matches[currentMatch].metadata
+                                      .stats.pressure[0] +
+                                      results.matches[currentMatch].metadata
+                                        .stats.pressure[1]) /
                                     2
                                   : 0),
                             ),
@@ -299,10 +344,12 @@ export default function WeatherTwin() {
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matches[0].metadata.stats.windspeed
+                      {results.matches[currentMatch].metadata.stats.windspeed
                         ? `${(
-                            (results.matches[0].metadata.stats.windspeed[0] +
-                              results.matches[0].metadata.stats.windspeed[1]) /
+                            (results.matches[currentMatch].metadata.stats
+                              .windspeed[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .windspeed[1]) /
                             2
                           ).toFixed(1)} km/h`
                         : "No data"}
@@ -320,9 +367,9 @@ export default function WeatherTwin() {
                                 (results.input.metadata.stats.windspeed?.[1] ??
                                   0)) /
                                 2 -
-                                ((results.matches[0].metadata.stats
+                                ((results.matches[currentMatch].metadata.stats
                                   .windspeed?.[0] ?? 0) +
-                                  (results.matches[0].metadata.stats
+                                  (results.matches[currentMatch].metadata.stats
                                     .windspeed?.[1] ?? 0)) /
                                   2,
                             ) *
@@ -348,10 +395,12 @@ export default function WeatherTwin() {
                         : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matches[0].metadata.stats.rainfall
+                      {results.matches[currentMatch].metadata.stats.rainfall
                         ? `${(
-                            (results.matches[0].metadata.stats.rainfall[0] +
-                              results.matches[0].metadata.stats.rainfall[1]) /
+                            (results.matches[currentMatch].metadata.stats
+                              .rainfall[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .rainfall[1]) /
                             2
                           ).toFixed(1)} mm`
                         : "No data"}
@@ -369,9 +418,9 @@ export default function WeatherTwin() {
                                 (results.input.metadata.stats.rainfall?.[1] ??
                                   0)) /
                                 2 -
-                                ((results.matches[0].metadata.stats
+                                ((results.matches[currentMatch].metadata.stats
                                   .rainfall?.[0] ?? 0) +
-                                  (results.matches[0].metadata.stats
+                                  (results.matches[currentMatch].metadata.stats
                                     .rainfall?.[1] ?? 0)) /
                                   2,
                             ) *
@@ -383,8 +432,23 @@ export default function WeatherTwin() {
                 </div>
               </div>
             </div>
-
-            <footer className="mt-16 text-center text-xs text-gray-700 font-mono">
+            <div className="flex flex-row justify-between pt-4">
+              <Button
+                variant={"ghost"}
+                disabled={currentMatch === 0}
+                onClick={() => setCurrentMatch((draft) => draft - 1)}
+              >
+                <ArrowLeft size={50} /> Previous Match
+              </Button>
+              <Button
+                variant={"ghost"}
+                disabled={currentMatch === 2}
+                onClick={() => setCurrentMatch((draft) => draft + 1)}
+              >
+                Next Match <ArrowRight size={50} />
+              </Button>
+            </div>
+            <footer className="text-center text-xs text-gray-700 font-mono">
               <p>Made by Andrés Duvvuri</p>
             </footer>
           </div>
