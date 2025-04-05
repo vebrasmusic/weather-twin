@@ -17,12 +17,17 @@ def attach_meta(city_data: CityData) -> CityData:
     return city_data
 
 
-def fetch_country(city_data: CityData) -> str:
-    location = geolocator.reverse([city_data.metadata.lat, city_data.metadata.lng])
-    code = location.raw["address"]["ISO3166-2-lvl4"]
-    code = code.split("-")[0]
-    country = pycountry.countries.get(alpha_2=code)
-    return country.name
+def fetch_country(city_data: CityData) -> str | None:
+    try:
+        location = geolocator.reverse([city_data.metadata.lat, city_data.metadata.lng])
+        code = location.raw.get("address", {}).get("ISO3166-2-lvl4")
+        if not code:
+            return None
+        code = code.split("-")[0]
+        country = pycountry.countries.get(alpha_2=code)
+        return country.name if country else None
+    except Exception:
+        return None
 
 
 def fetch_weather(city_data: CityData):

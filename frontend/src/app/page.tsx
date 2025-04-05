@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { ArrowLeft } from "lucide-react";
 import MapComponent from "@/components/weather/map-component";
@@ -21,7 +20,7 @@ export default function WeatherTwin() {
     setIsLoading(true);
     try {
       const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
-        `http://127.0.0.1:8000/api/matches?city_name=${cityName}`
+        `api/matches?city_name=${cityName}`,
       );
       setIsLoading(false);
       setResults(response.data);
@@ -192,9 +191,9 @@ export default function WeatherTwin() {
                                       results.matches[0].metadata.stats
                                         .temp[1]) /
                                     2
-                                  : 0)
+                                  : 0),
                             ) *
-                              10
+                              10,
                         )}%`,
                       }}
                     ></div>
@@ -243,8 +242,8 @@ export default function WeatherTwin() {
                                       results.matches[0].metadata.stats
                                         .pressure[1]) /
                                     2
-                                  : 0)
-                            )
+                                  : 0),
+                            ),
                         )}%`,
                       }}
                     ></div>
@@ -291,9 +290,9 @@ export default function WeatherTwin() {
                                   .windspeed?.[0] ?? 0) +
                                   (results.matches[0].metadata.stats
                                     .windspeed?.[1] ?? 0)) /
-                                  2
+                                  2,
                             ) *
-                              5
+                              5,
                         )}%`,
                       }}
                     ></div>
@@ -340,9 +339,9 @@ export default function WeatherTwin() {
                                   .rainfall?.[0] ?? 0) +
                                   (results.matches[0].metadata.stats
                                     .rainfall?.[1] ?? 0)) /
-                                  2
+                                  2,
                             ) *
-                              5
+                              5,
                         )}%`,
                       }}
                     ></div>
