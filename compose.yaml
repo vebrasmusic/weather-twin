@@ -2,6 +2,8 @@ services:
   frontend:
     build: ./frontend
     container_name: "frontend"
+    environment:
+      STAGE: "prod"
     labels:
       - "traefik.enable=true"
     ports:

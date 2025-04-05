@@ -9,6 +9,7 @@ import SearchInput from "@/components/weather/search-input";
 import axios, { AxiosResponse } from "axios";
 import { WeatherTwinResponse } from "@/lib/types";
 import { toast } from "sonner";
+import { baseUrl } from "@/lib/url";
 
 export default function WeatherTwin() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +21,7 @@ export default function WeatherTwin() {
     setIsLoading(true);
     try {
       const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
-        `api/matches?city_name=${cityName}`,
+        `${baseUrl}/matches?city_name=${cityName}`,
       );
       setIsLoading(false);
       setResults(response.data);
