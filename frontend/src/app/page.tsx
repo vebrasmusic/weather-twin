@@ -1,95 +1,76 @@
 "use client";
-
-import { useState } from "react";
-import { ArrowLeft } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import MapComponent from "@/components/weather/map-component";
 import ClimateData from "@/components/weather/climate-data";
 import ShareMenu from "@/components/weather/share-menu";
 import AnimatedBackground from "@/components/weather/animated-background";
 import SearchInput from "@/components/weather/search-input";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { WeatherTwinResponse } from "@/lib/types";
+import { toast } from "sonner";
+import { baseUrl, socketUrl } from "@/lib/url";
+import { v4 as uuidv4 } from "uuid";
+import useWebSocket, { ReadyState } from "react-use-websocket";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { calculateKoppenSimilarity } from "@/lib/utils";
+import { useImmer } from "use-immer";
+import { Button } from "@/components/ui/button";
 
 export default function WeatherTwin() {
-  const [city, setCity] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<{
-    sourceCity: {
-      name: string;
-      lat: number;
-      lng: number;
-      country: string;
-      stats: {
-        temp: number;
-        humidity: number;
-        windSpeed: number;
-        rainfall: number;
-      };
-      koppen: string;
-      koppenFull: string;
-    };
-    matchCity: {
-      name: string;
-      lat: number;
-      lng: number;
-      country: string;
-      climate: string;
-      description: string;
-      stats: {
-        temp: number;
-        humidity: number;
-        windSpeed: number;
-        rainfall: number;
-      };
-      matchPercentage: number;
-      koppen: string;
-      koppenFull: string;
-    };
-  } | null>(null);
+  const [results, setResults] = useState<WeatherTwinResponse | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
+  const [currentMatch, setCurrentMatch] = useImmer(0);
 
-  const handleSearch = (cityName: string) => {
+  const fullSocketUrl = useMemo(() => {
+    if (!requestId) return null;
+
+    return socketUrl + `?request_id=${requestId}`;
+  }, [requestId]);
+
+  const { lastMessage } = useWebSocket(
+    fullSocketUrl,
+    {
+      onOpen: async () => {
+        try {
+          const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
+            `${baseUrl}/matches`,
+            {
+              params: {
+                city_name: city,
+                request_id: requestId,
+              },
+            },
+          );
+          setIsLoading(false);
+          setResults(response.data);
+        } catch (e) {
+          console.log("There was an error:", e);
+          setIsLoading(false);
+          if (axios.isAxiosError(e)) {
+            const msg = e.response?.data.detail;
+            if (msg === "No climate data found for station.") {
+              toast.error("Couldn't find any data for that city, try another!");
+            } else {
+              toast.error("Something went wrong :(");
+            }
+          } else {
+            toast.error("Unexpected error");
+          }
+        }
+      },
+    },
+    !!requestId,
+  );
+
+  const handleSearch = async (cityName: string) => {
     if (!cityName.trim()) return;
-
-    setCity(cityName);
+    const newRequestId = uuidv4();
+    setRequestId(newRequestId);
     setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      // Mock data - in a real app, this would come from your API
-      setResults({
-        sourceCity: {
-          name: cityName,
-          lat: 32.7157,
-          lng: -117.1611,
-          country: "United States",
-          stats: {
-            temp: 22,
-            humidity: 65,
-            windSpeed: 12,
-            rainfall: 260,
-          },
-          koppen: "Csa",
-          koppenFull: "Mediterranean hot summer climate",
-        },
-        matchCity: {
-          name: "Casablanca",
-          lat: 33.5731,
-          lng: -7.5898,
-          country: "Morocco",
-          climate: "Mediterranean",
-          description:
-            "Casablanca has a Mediterranean climate with mild, wet winters and hot, dry summers. The average temperature ranges from 12°C (54°F) in winter to 23°C (73°F) in summer, similar to coastal Southern California.",
-          stats: {
-            temp: 21,
-            humidity: 70,
-            windSpeed: 14,
-            rainfall: 280,
-          },
-          matchPercentage: 92,
-          koppen: "Csa",
-          koppenFull: "Mediterranean hot summer climate",
-        },
-      });
-      setIsLoading(false);
-    }, 1500);
+    setCity(cityName);
   };
 
   return (
@@ -105,7 +86,11 @@ export default function WeatherTwin() {
                 </h1>
 
                 <div className="relative">
-                  <SearchInput onSearch={handleSearch} isLoading={isLoading} />
+                  <SearchInput
+                    onSearch={handleSearch}
+                    isLoading={isLoading}
+                    loadingText={lastMessage?.data}
+                  />
                 </div>
               </div>
             </div>
@@ -115,10 +100,6 @@ export default function WeatherTwin() {
             <p className="text-gray-500 text-sm text-center max-w-md mx-auto">
               Find cities around the world with climates matching your own.
             </p>
-            <p className="text-gray-500 text-sm text-center max-w-md mx-auto mt-4">
-              Disclaimer: This is using mock data right now as we build out the
-              backend.
-            </p>
           </div>
         </div>
       ) : (
@@ -126,31 +107,32 @@ export default function WeatherTwin() {
           <div className="max-w-7xl mx-auto px-4 py-6">
             <div className="flex justify-between items-center mb-6">
               <button
-                onClick={() => setResults(null)}
+                onClick={() => {
+                  setResults(null);
+                  setCurrentMatch(0);
+                }}
                 className="flex hover:cursor-pointer items-center text-sm text-gray-400 hover:text-gray-300 transition-colors"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </button>
-
               <ShareMenu />
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-light text-white">
-                    {results.sourceCity.name}
+                    <strong>{results.input.metadata.city}</strong>
                   </h2>
                   <div className="text-xs text-gray-500 font-mono">
-                    {results.sourceCity.country}
+                    {results.input.metadata.country}
                   </div>
                 </div>
 
                 <div className="aspect-video relative overflow-hidden mb-3">
                   <MapComponent
-                    lat={results.sourceCity.lat}
-                    lng={results.sourceCity.lng}
+                    lat={results.input.metadata.lat}
+                    lng={results.input.metadata.lng}
                     zoom={10}
                     mapStyle="dark"
                   />
@@ -158,35 +140,51 @@ export default function WeatherTwin() {
 
                 <div className="flex items-center mb-3">
                   <div className="text-xs py-1 px-2 bg-[#041008] text-gray-400 font-mono">
-                    {results.sourceCity.koppen}
+                    {results.input.metadata.koppen_code}
                   </div>
                   <div className="text-xs text-gray-500 ml-2">
-                    {results.sourceCity.koppenFull}
+                    {results.input.metadata.koppen_description}
                   </div>
                 </div>
 
-                <ClimateData stats={results.sourceCity.stats} />
+                <ClimateData stats={results.input.metadata.stats} />
+
+                <ScrollArea className="mt-4 text-sm text-gray-400 leading-relaxed h-30 mask-alpha mask-b-from-black mask-b-from-60% mask-b-to-transparent">
+                  {results.input.metadata.description ? (
+                    <>
+                      <p>{results.input.metadata.description}</p>
+                      <div className="h-8" /> {/* adds empty vertical space */}
+                    </>
+                  ) : (
+                    "No description."
+                  )}
+                </ScrollArea>
               </div>
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-xl font-light text-white">
-                    {results.matchCity.name}
+                  <h2 className="text-xl font-light text-gray-500">
+                    {`Match ${currentMatch + 1}`} (
+                    {calculateKoppenSimilarity(
+                      results.matches[currentMatch].metadata.koppen_code,
+                      results.input.metadata.koppen_code,
+                    )}
+                    % Similar):{" "}
+                    <strong className="text-white">
+                      {results.matches[currentMatch].metadata.city}
+                    </strong>
                   </h2>
                   <div className="flex items-center gap-2">
                     <div className="text-xs text-gray-500 font-mono">
-                      {results.matchCity.country}
-                    </div>
-                    <div className="text-xs py-0.5 px-2 bg-[#041008] text-gray-400 font-mono">
-                      {results.matchCity.matchPercentage}% Match
+                      {results.matches[currentMatch].metadata.country}
                     </div>
                   </div>
                 </div>
 
                 <div className="aspect-video relative overflow-hidden mb-3">
                   <MapComponent
-                    lat={results.matchCity.lat}
-                    lng={results.matchCity.lng}
+                    lat={results.matches[currentMatch].metadata.lat}
+                    lng={results.matches[currentMatch].metadata.lng}
                     zoom={10}
                     mapStyle="dark"
                   />
@@ -194,21 +192,31 @@ export default function WeatherTwin() {
 
                 <div className="flex items-center mb-3">
                   <div className="text-xs py-1 px-2 bg-[#041008] text-gray-400 font-mono">
-                    {results.matchCity.koppen}
+                    {results.matches[currentMatch].metadata.koppen_code}
                   </div>
                   <div className="text-xs text-gray-500 ml-2">
-                    {results.matchCity.koppenFull}
+                    {results.matches[currentMatch].metadata.koppen_description}
                   </div>
                 </div>
 
-                <ClimateData stats={results.matchCity.stats} />
+                <ClimateData
+                  stats={results.matches[currentMatch].metadata.stats}
+                />
 
-                <div className="mt-4 text-sm text-gray-400 leading-relaxed">
-                  {results.matchCity.description}
-                </div>
+                <ScrollArea className="mt-4 text-sm text-gray-400 leading-relaxed h-30 mask-alpha mask-b-from-black mask-b-from-60% mask-b-to-transparent">
+                  {results.matches[currentMatch].metadata.description ? (
+                    <>
+                      <p>
+                        {results.matches[currentMatch].metadata.description}
+                      </p>
+                      <div className="h-8" /> {/* adds empty vertical space */}
+                    </>
+                  ) : (
+                    "No description."
+                  )}
+                </ScrollArea>
               </div>
             </div>
-
             <div className="mt-8 pt-6 border-t border-[#0A1A0A]">
               <h3 className="text-xs uppercase tracking-wider text-gray-600 mb-4 font-mono">
                 Climate Comparison
@@ -220,10 +228,24 @@ export default function WeatherTwin() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
-                      {results.sourceCity.stats.temp}°C
+                      {results.input.metadata.stats.temp
+                        ? `${(
+                            (results.input.metadata.stats.temp[0] +
+                              results.input.metadata.stats.temp[1]) /
+                            2
+                          ).toFixed(1)}°C`
+                        : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matchCity.stats.temp}°C
+                      {results.matches[currentMatch].metadata.stats.temp
+                        ? `${(
+                            (results.matches[currentMatch].metadata.stats
+                              .temp[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .temp[1]) /
+                            2
+                          ).toFixed(1)}°C`
+                        : "No data"}
                     </span>
                   </div>
                   <div className="h-px bg-[#0A1A0A] overflow-hidden">
@@ -233,8 +255,19 @@ export default function WeatherTwin() {
                         width: `${Math.abs(
                           100 -
                             Math.abs(
-                              results.sourceCity.stats.temp -
-                                results.matchCity.stats.temp,
+                              (results.input.metadata.stats.temp
+                                ? (results.input.metadata.stats.temp[0] +
+                                    results.input.metadata.stats.temp[1]) /
+                                  2
+                                : 0) -
+                                (results.matches[currentMatch].metadata.stats
+                                  .temp
+                                  ? (results.matches[currentMatch].metadata
+                                      .stats.temp[0] +
+                                      results.matches[currentMatch].metadata
+                                        .stats.temp[1]) /
+                                    2
+                                  : 0),
                             ) *
                               10,
                         )}%`,
@@ -245,14 +278,28 @@ export default function WeatherTwin() {
 
                 <div className="space-y-2">
                   <div className="text-xs text-gray-600 font-mono">
-                    Humidity
+                    Pressure
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
-                      {results.sourceCity.stats.humidity}%
+                      {results.input.metadata.stats.pressure
+                        ? `${(
+                            (results.input.metadata.stats.pressure[0] +
+                              results.input.metadata.stats.pressure[1]) /
+                            2
+                          ).toFixed(1)} hPa`
+                        : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matchCity.stats.humidity}%
+                      {results.matches[currentMatch].metadata.stats.pressure
+                        ? `${(
+                            (results.matches[currentMatch].metadata.stats
+                              .pressure[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .pressure[1]) /
+                            2
+                          ).toFixed(1)} hPa`
+                        : "No data"}
                     </span>
                   </div>
                   <div className="h-px bg-[#0A1A0A] overflow-hidden">
@@ -262,8 +309,19 @@ export default function WeatherTwin() {
                         width: `${Math.abs(
                           100 -
                             Math.abs(
-                              results.sourceCity.stats.humidity -
-                                results.matchCity.stats.humidity,
+                              (results.input.metadata.stats.pressure
+                                ? (results.input.metadata.stats.pressure[0] +
+                                    results.input.metadata.stats.pressure[1]) /
+                                  2
+                                : 0) -
+                                (results.matches[currentMatch].metadata.stats
+                                  .pressure
+                                  ? (results.matches[currentMatch].metadata
+                                      .stats.pressure[0] +
+                                      results.matches[currentMatch].metadata
+                                        .stats.pressure[1]) /
+                                    2
+                                  : 0),
                             ),
                         )}%`,
                       }}
@@ -277,10 +335,24 @@ export default function WeatherTwin() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
-                      {results.sourceCity.stats.windSpeed} km/h
+                      {results.input.metadata.stats.windspeed
+                        ? `${(
+                            (results.input.metadata.stats.windspeed[0] +
+                              results.input.metadata.stats.windspeed[1]) /
+                            2
+                          ).toFixed(1)} km/h`
+                        : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matchCity.stats.windSpeed} km/h
+                      {results.matches[currentMatch].metadata.stats.windspeed
+                        ? `${(
+                            (results.matches[currentMatch].metadata.stats
+                              .windspeed[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .windspeed[1]) /
+                            2
+                          ).toFixed(1)} km/h`
+                        : "No data"}
                     </span>
                   </div>
                   <div className="h-px bg-[#0A1A0A] overflow-hidden">
@@ -290,8 +362,16 @@ export default function WeatherTwin() {
                         width: `${Math.abs(
                           100 -
                             Math.abs(
-                              results.sourceCity.stats.windSpeed -
-                                results.matchCity.stats.windSpeed,
+                              ((results.input.metadata.stats.windspeed?.[0] ??
+                                0) +
+                                (results.input.metadata.stats.windspeed?.[1] ??
+                                  0)) /
+                                2 -
+                                ((results.matches[currentMatch].metadata.stats
+                                  .windspeed?.[0] ?? 0) +
+                                  (results.matches[currentMatch].metadata.stats
+                                    .windspeed?.[1] ?? 0)) /
+                                  2,
                             ) *
                               5,
                         )}%`,
@@ -306,10 +386,24 @@ export default function WeatherTwin() {
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-white font-mono">
-                      {results.sourceCity.stats.rainfall} mm
+                      {results.input.metadata.stats.rainfall
+                        ? `${(
+                            (results.input.metadata.stats.rainfall[0] +
+                              results.input.metadata.stats.rainfall[1]) /
+                            2
+                          ).toFixed(1)} mm`
+                        : "No data"}
                     </span>
                     <span className="text-white font-mono">
-                      {results.matchCity.stats.rainfall} mm
+                      {results.matches[currentMatch].metadata.stats.rainfall
+                        ? `${(
+                            (results.matches[currentMatch].metadata.stats
+                              .rainfall[0] +
+                              results.matches[currentMatch].metadata.stats
+                                .rainfall[1]) /
+                            2
+                          ).toFixed(1)} mm`
+                        : "No data"}
                     </span>
                   </div>
                   <div className="h-px bg-[#0A1A0A] overflow-hidden">
@@ -319,9 +413,17 @@ export default function WeatherTwin() {
                         width: `${Math.abs(
                           100 -
                             Math.abs(
-                              results.sourceCity.stats.rainfall -
-                                results.matchCity.stats.rainfall,
-                            ) /
+                              ((results.input.metadata.stats.rainfall?.[0] ??
+                                0) +
+                                (results.input.metadata.stats.rainfall?.[1] ??
+                                  0)) /
+                                2 -
+                                ((results.matches[currentMatch].metadata.stats
+                                  .rainfall?.[0] ?? 0) +
+                                  (results.matches[currentMatch].metadata.stats
+                                    .rainfall?.[1] ?? 0)) /
+                                  2,
+                            ) *
                               5,
                         )}%`,
                       }}
@@ -330,8 +432,23 @@ export default function WeatherTwin() {
                 </div>
               </div>
             </div>
-
-            <footer className="mt-16 text-center text-xs text-gray-700 font-mono">
+            <div className="flex flex-row justify-between pt-4">
+              <Button
+                variant={"ghost"}
+                disabled={currentMatch === 0}
+                onClick={() => setCurrentMatch((draft) => draft - 1)}
+              >
+                <ArrowLeft size={50} /> Previous Match
+              </Button>
+              <Button
+                variant={"ghost"}
+                disabled={currentMatch === 2}
+                onClick={() => setCurrentMatch((draft) => draft + 1)}
+              >
+                Next Match <ArrowRight size={50} />
+              </Button>
+            </div>
+            <footer className="text-center text-xs text-gray-700 font-mono">
               <p>Made by Andrés Duvvuri</p>
             </footer>
           </div>

@@ -1,0 +1,15 @@
+services:
+  frontend:
+    build: ./frontend
+    container_name: "frontend"
+    environment:
+      STAGE: "prod"
+    labels:
+      - "traefik.enable=true"
+  backend:
+    build: ./backend
+    container_name: "backend"
+    env_file:
+      - ./backend/.env
+    environment:
+      STAGE: prod

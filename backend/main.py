@@ -1,11 +1,26 @@
+import os
 from fastapi import FastAPI
 from cities import router
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
-from slowapi.errors import RateLimitExceeded
+from fastapi.middleware.cors import CORSMiddleware
 
+ENV = os.getenv("STAGE", "dev")
 
+if ENV == "dev":
+    origins = [
+        "http://localhost:3000",
+        "http://localhost",
+    ]
+else:
+    origins = [
+        "https://andresduvvuri.com",
+    ]
 app = FastAPI()
 
-
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(router.router)
