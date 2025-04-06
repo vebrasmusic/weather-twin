@@ -6,12 +6,10 @@ services:
       STAGE: "prod"
     labels:
       - "traefik.enable=true"
-    ports:
-      - 3000:3000
   backend:
     build: ./backend
     container_name: "backend"
     env_file:
       - ./backend/.env
-    ports:
-      - 8000:8000
+    environment:
+      STAGE: prod
