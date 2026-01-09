@@ -1,6 +1,5 @@
 from typing import List, Optional
 
-from meteostat import Base
 from pydantic import BaseModel, ConfigDict, Field
 
 
