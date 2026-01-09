@@ -8,7 +8,7 @@ dependencies = [
     "annoy>=1.17.3",
     "fastapi[standard]>=0.115.12",
     "geopy>=2.4.1",
-    "meteostat>=1.6.8",
+    "meteostat==1.6.8",
     "numpy>=2.2.4",
     "pinecone>=6.0.2",
     "pycountry>=24.6.1",
