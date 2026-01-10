@@ -3,26 +3,11 @@ services:
     build: ./frontend
     environment:
       NEXT_PUBLIC_STAGE: "prod"
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.weather-twin.tls=true
-      - traefik.http.routers.weather-twin.tls.certresolver=cloudflare
-      - traefik.http.routers.weather-twin.entrypoints=websecure
-      - traefik.http.routers.weather-twin.rule=Host(`wt.andresduvvuri.com`)
     restart: unless-stopped
 
   backend:
     build: ./backend
     container_name: "backend"
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.wt-api.rule=Host(`wt.andresduvvuri.com`) && PathPrefix(`/api`)
-      - traefik.http.routers.wt-api.entrypoints=websecure
-      - traefik.http.routers.wt-api.tls=true
-      - traefik.http.routers.wt-api.tls.certresolver=cloudflare
-      - traefik.http.routers.wt-api.middlewares=ratelimit
-      - traefik.http.middlewares.ratelimit.ratelimit.average=3
-      - traefik.http.middlewares.ratelimit.ratelimit.burst=100
     env_file:
       - ./backend/.env
     environment:
