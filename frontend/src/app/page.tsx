@@ -29,13 +29,17 @@ export default function WeatherTwin() {
     // Use the proxy WebSocket endpoint
     const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = typeof window !== 'undefined' ? window.location.host : 'localhost:3000';
-    return `${protocol}//${host}/api/ws?request_id=${requestId}`;
+    const url = `${protocol}//${host}/api/ws?request_id=${requestId}`;
+    console.log(`🔌 [Client] WebSocket URL: ${url}`);
+    return url;
   }, [requestId]);
 
   const { lastMessage } = useWebSocket(
     fullSocketUrl,
     {
       onOpen: async () => {
+        console.log("✅ [Client] WebSocket connection opened");
+        console.log(`📨 [Client] Fetching matches for: ${city}`);
         try {
           // Use the proxy API endpoint
           const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
@@ -47,13 +51,15 @@ export default function WeatherTwin() {
               },
             },
           );
+          console.log("✅ [Client] Received matches data:", response.data);
           setIsLoading(false);
           setResults(response.data);
         } catch (e) {
-          console.log("There was an error:", e);
+          console.error("❌ [Client] Error fetching matches:", e);
           setIsLoading(false);
           if (axios.isAxiosError(e)) {
             const msg = e.response?.data.detail;
+            console.error(`❌ [Client] Error detail: ${msg}`);
             if (msg === "No climate data found for station.") {
               toast.error("Couldn't find any data for that city, try another!");
             } else {
@@ -63,6 +69,15 @@ export default function WeatherTwin() {
             toast.error("Unexpected error");
           }
         }
+      },
+      onClose: () => {
+        console.log("🔌 [Client] WebSocket connection closed");
+      },
+      onError: (event) => {
+        console.error("❌ [Client] WebSocket error:", event);
+      },
+      onMessage: (event) => {
+        console.log("📩 [Client] WebSocket message received:", event.data);
       },
     },
     !!requestId,
