@@ -80,7 +80,7 @@ requires-dist = [
     { name = "annoy", specifier = ">=1.17.3" },
     { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
     { name = "geopy", specifier = ">=2.4.1" },
-    { name = "meteostat", specifier = ">=1.6.8" },
+    { name = "meteostat", specifier = "==1.6.8" },
     { name = "numpy", specifier = ">=2.2.4" },
     { name = "pinecone", specifier = ">=6.0.2" },
     { name = "pycountry", specifier = ">=24.6.1" },

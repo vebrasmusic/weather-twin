@@ -1,4 +1,3 @@
-from uuid import uuid4
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, status
 from cities.inference import Inference
 from cities.metadata_fetcher import MetadataFetcher
@@ -16,7 +15,9 @@ manager = ConnectionManager()
 
 @router.get("/matches")
 async def get_matches(city_name: str, request_id: str) -> WeatherTwinResponse:
-
+    """
+    actual requester for city data. need to send the request id that ties a websocket conn to each request, so i know who to send it to
+    """
     await manager.send_message("Processing input city data...", request_id)
     await asyncio.sleep(0)  # yield control so FastAPI can flush this out
     processing = (
@@ -62,6 +63,9 @@ async def get_matches(city_name: str, request_id: str) -> WeatherTwinResponse:
 
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket, request_id: str):
+    """
+    init websocket conn, add to the connection manager so we know who to send the actual result data too later.
+    """
     await manager.connect(websocket, request_id)
     try:
         while True:

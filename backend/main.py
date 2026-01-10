@@ -1,19 +1,7 @@
-import os
 from fastapi import FastAPI
 from cities import router
 from fastapi.middleware.cors import CORSMiddleware
 
-ENV = os.getenv("STAGE", "dev")
-
-if ENV == "dev":
-    origins = [
-        "http://localhost:3000",
-        "http://localhost",
-    ]
-else:
-    origins = [
-        "https://andresduvvuri.com",
-    ]
 app = FastAPI()
 
 app.add_middleware(

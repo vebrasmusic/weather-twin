@@ -5,7 +5,10 @@
       "Bash(docker compose build:*)",
       "Bash(docker exec:*)",
       "Bash(docker run:*)",
-      "Bash(timeout 10 docker compose:*)"
+      "Bash(timeout 10 docker compose:*)",
+      "Bash(chmod:*)",
+      "Bash(ls:*)",
+      "Bash(git rm:*)"
     ]
   }
 }

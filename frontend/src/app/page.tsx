@@ -9,7 +9,6 @@ import SearchInput from "@/components/weather/search-input";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { WeatherTwinResponse } from "@/lib/types";
 import { toast } from "sonner";
-import { baseUrl, socketUrl } from "@/lib/url";
 import { v4 as uuidv4 } from "uuid";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,7 +26,10 @@ export default function WeatherTwin() {
   const fullSocketUrl = useMemo(() => {
     if (!requestId) return null;
 
-    return socketUrl + `?request_id=${requestId}`;
+    // Use the proxy WebSocket endpoint
+    const protocol = typeof window !== 'undefined' && window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = typeof window !== 'undefined' ? window.location.host : 'localhost:3000';
+    return `${protocol}//${host}/api/ws?request_id=${requestId}`;
   }, [requestId]);
 
   const { lastMessage } = useWebSocket(
@@ -35,8 +37,9 @@ export default function WeatherTwin() {
     {
       onOpen: async () => {
         try {
+          // Use the proxy API endpoint
           const response: AxiosResponse<WeatherTwinResponse> = await axios.get(
-            `${baseUrl}/matches`,
+            `/api/matches`,
             {
               params: {
                 city_name: city,
