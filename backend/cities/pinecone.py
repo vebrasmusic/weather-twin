@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from rich import print as pprint
 import os
 from pinecone import Pinecone
 from dotenv import load_dotenv
@@ -70,16 +71,11 @@ class PineconeDb(VectorDb):
             include_metadata=True,
             include_values=True,
         )
-        # Newer Pinecone versions: use model_dump() instead of to_dict()
-        try:
-            response_dict = query_response.model_dump()
-        except AttributeError:
-            # Fallback for older versions
-            try:
-                response_dict = query_response.to_dict()
-            except AttributeError:
-                # If neither works, try converting directly
-                response_dict = dict(query_response)
+        print("query response we got:")
+        pprint(query_response)
+        response_dict = query_response.to_dict()
+        pprint("response dict from query: ")
+        pprint(response_dict)
 
         pcqr = PineconeQueryResponse(**response_dict)
         filtered_matches = self.filter_query(pcqr, city_data)
