@@ -2,6 +2,7 @@ const { createServer } = require("http");
 const { parse } = require("url");
 const next = require("next");
 const { createProxyMiddleware } = require("http-proxy-middleware");
+const httpProxy = require("http-proxy");
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = dev ? "localhost" : "0.0.0.0";
@@ -67,43 +68,45 @@ app.prepare().then(() => {
     }
   });
 
-  // WebSocket proxy middleware
-  const wsProxy = createProxyMiddleware({
+  // Create WebSocket proxy using http-proxy directly
+  const wsProxy = httpProxy.createProxyServer({
     target: backendUrl,
-    changeOrigin: true,
     ws: true,
-    pathRewrite: {
-      "^/api/ws": "/api/ws",
-    },
-    logLevel: "debug",
-    onProxyReqWs: (proxyReq, req, socket, options, head) => {
-      const fullUrl = `${backendUrl}${req.url}`;
-      console.log(`🔌 WebSocket PROXY REQUEST: ${req.url}`);
-      console.log(`   → Target: ${fullUrl}`);
-      console.log(`   → Headers:`, JSON.stringify(proxyReq.getHeaders(), null, 2));
-    },
-    onOpen: (proxySocket) => {
-      console.log("✅ WebSocket connection OPENED to backend");
-      proxySocket.on("error", (err) => {
-        console.error("❌ Proxy socket error:", err.message);
-      });
-    },
-    onClose: (res, socket, head) => {
-      console.log("🔌 WebSocket connection CLOSED");
-    },
-    onError: (err, req, socket) => {
-      console.error("❌ WebSocket PROXY ERROR:");
-      console.error(`   URL: ${req?.url || 'unknown'}`);
-      console.error(`   Target: ${backendUrl}`);
-      console.error(`   Error message: ${err.message}`);
-      console.error(`   Error code: ${err.code}`);
-      console.error(`   Error stack:`, err.stack);
+    changeOrigin: true,
+  });
 
-      // Send error response to client
-      if (socket && socket.writable) {
-        socket.end();
-      }
-    },
+  // Handle proxy errors
+  wsProxy.on("error", (err, req, socket) => {
+    console.error("❌ WebSocket PROXY ERROR:");
+    console.error(`   URL: ${req?.url || 'unknown'}`);
+    console.error(`   Target: ${backendUrl}`);
+    console.error(`   Error message: ${err.message}`);
+    console.error(`   Error code: ${err.code}`);
+    console.error(`   Error stack:`, err.stack);
+
+    // Send error response to client
+    if (socket && socket.writable) {
+      socket.write('HTTP/1.1 502 Bad Gateway\r\n\r\n');
+      socket.end();
+    }
+  });
+
+  // Handle successful proxy connections
+  wsProxy.on("open", (proxySocket) => {
+    console.log("✅ WebSocket connection OPENED to backend");
+    proxySocket.on("error", (err) => {
+      console.error("❌ Proxy socket error:", err.message);
+    });
+  });
+
+  wsProxy.on("close", (res, socket, head) => {
+    console.log("🔌 WebSocket proxy connection CLOSED");
+  });
+
+  wsProxy.on("proxyReqWs", (proxyReq, req, socket, options, head) => {
+    console.log(`🔌 WebSocket PROXY REQUEST: ${req.url}`);
+    console.log(`   → Target: ${backendUrl}${req.url}`);
+    console.log(`   → Headers:`, JSON.stringify(proxyReq.getHeaders ? proxyReq.getHeaders() : {}, null, 2));
   });
 
   // Apply WebSocket proxy to the server
@@ -111,6 +114,8 @@ app.prepare().then(() => {
     const { pathname } = parse(req.url, true);
 
     console.log(`🔄 WebSocket UPGRADE request received: ${req.url}`);
+    console.log(`   Path: ${pathname}`);
+    console.log(`   Headers:`, JSON.stringify(req.headers, null, 2));
 
     if (pathname === "/api/ws") {
       console.log(`   ✅ Proxying to backend: ${backendUrl}${req.url}`);
@@ -122,16 +127,17 @@ app.prepare().then(() => {
       });
 
       try {
-        wsProxy.upgrade(req, socket, head);
-        console.log("   📤 Upgrade call completed");
+        // Use ws() method for WebSocket proxy
+        wsProxy.ws(req, socket, head);
+        console.log("   📤 WebSocket proxy initiated");
       } catch (err) {
-        console.error("❌ Exception during wsProxy.upgrade():");
+        console.error("❌ Exception during wsProxy.ws():");
         console.error(`   Error: ${err.message}`);
         console.error(`   Stack: ${err.stack}`);
         socket.destroy();
       }
     } else {
-      console.log(`   ❌ Invalid WebSocket path, destroying socket`);
+      console.log(`   ❌ Invalid WebSocket path: ${pathname}, destroying socket`);
       socket.destroy();
     }
   });

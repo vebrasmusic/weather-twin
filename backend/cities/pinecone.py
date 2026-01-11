@@ -70,7 +70,18 @@ class PineconeDb(VectorDb):
             include_metadata=True,
             include_values=True,
         )
-        pcqr = PineconeQueryResponse(**query_response.to_dict())
+        # Newer Pinecone versions: use model_dump() instead of to_dict()
+        try:
+            response_dict = query_response.model_dump()
+        except AttributeError:
+            # Fallback for older versions
+            try:
+                response_dict = query_response.to_dict()
+            except AttributeError:
+                # If neither works, try converting directly
+                response_dict = dict(query_response)
+
+        pcqr = PineconeQueryResponse(**response_dict)
         filtered_matches = self.filter_query(pcqr, city_data)
         match_cities = self.transform_match(filtered_matches)
         return city_data, match_cities
