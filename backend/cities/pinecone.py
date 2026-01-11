@@ -71,11 +71,7 @@ class PineconeDb(VectorDb):
             include_metadata=True,
             include_values=True,
         )
-        print("query response we got:")
-        pprint(query_response)
         response_dict = query_response.to_dict()
-        pprint("response dict from query: ")
-        pprint(response_dict)
 
         pcqr = PineconeQueryResponse(**response_dict)
         filtered_matches = self.filter_query(pcqr, city_data)
