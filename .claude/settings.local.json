@@ -9,7 +9,11 @@
       "Bash(chmod:*)",
       "Bash(ls:*)",
       "Bash(git rm:*)",
-      "Bash(pnpm list:*)"
+      "Bash(pnpm list:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(pip freeze:*)",
+      "Bash(.venv/bin/python:*)",
+      "Bash(uv sync:*)"
     ]
   }
 }

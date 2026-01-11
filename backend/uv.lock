@@ -69,6 +69,7 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "pywikibot" },
     { name = "rasterio" },
+    { name = "rich" },
     { name = "scikit-learn" },
     { name = "slowapi" },
     { name = "torch" },
@@ -77,21 +78,22 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "annoy", specifier = ">=1.17.3" },
-    { name = "fastapi", extras = ["standard"], specifier = ">=0.115.12" },
-    { name = "geopy", specifier = ">=2.4.1" },
+    { name = "annoy", specifier = "==1.17.3" },
+    { name = "fastapi", extras = ["standard"], specifier = "==0.115.12" },
+    { name = "geopy", specifier = "==2.4.1" },
     { name = "meteostat", specifier = "==1.6.8" },
-    { name = "numpy", specifier = ">=2.2.4" },
+    { name = "numpy", specifier = "==2.2.4" },
     { name = "pinecone", specifier = "==6.0.2" },
-    { name = "pycountry", specifier = ">=24.6.1" },
-    { name = "pydantic", specifier = ">=2.10.6" },
-    { name = "python-dotenv", specifier = ">=1.0.1" },
-    { name = "pywikibot", specifier = ">=10.0.0" },
-    { name = "rasterio", specifier = ">=1.4.3" },
-    { name = "scikit-learn", specifier = ">=1.6.1" },
-    { name = "slowapi", specifier = ">=0.1.9" },
-    { name = "torch", specifier = ">=2.6.0" },
-    { name = "websockets", specifier = ">=15.0.1" },
+    { name = "pycountry", specifier = "==24.6.1" },
+    { name = "pydantic", specifier = "==2.10.6" },
+    { name = "python-dotenv", specifier = "==1.0.1" },
+    { name = "pywikibot", specifier = "==10.0.0" },
+    { name = "rasterio", specifier = "==1.4.3" },
+    { name = "rich", specifier = "==13.9.4" },
+    { name = "scikit-learn", specifier = "==1.6.1" },
+    { name = "slowapi", specifier = "==0.1.9" },
+    { name = "torch", specifier = "==2.6.0" },
+    { name = "websockets", specifier = "==15.0.1" },
 ]
 
 [[package]]
