@@ -26,6 +26,32 @@ app.prepare().then(() => {
       const parsedUrl = parse(req.url, true);
       const { pathname } = parsedUrl;
 
+      // Health check endpoint to test backend connectivity
+      if (pathname === "/api/health-check") {
+        console.log("🏥 Health check endpoint called");
+        try {
+          const testResponse = await fetch(`${backendUrl}/docs`);
+          console.log(`   ✅ Backend reachable: ${testResponse.status}`);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({
+            status: "ok",
+            backendUrl,
+            backendReachable: testResponse.ok,
+            backendStatus: testResponse.status
+          }));
+        } catch (err) {
+          console.error(`   ❌ Backend NOT reachable: ${err.message}`);
+          res.writeHead(500, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({
+            status: "error",
+            backendUrl,
+            backendReachable: false,
+            error: err.message
+          }));
+        }
+        return;
+      }
+
       // Proxy WebSocket connections to backend
       if (pathname === "/api/ws") {
         // This will be handled by the WebSocket proxy middleware below
@@ -49,23 +75,34 @@ app.prepare().then(() => {
     pathRewrite: {
       "^/api/ws": "/api/ws",
     },
-    logLevel: dev ? "debug" : "info",
+    logLevel: "debug",
     onProxyReqWs: (proxyReq, req, socket, options, head) => {
       const fullUrl = `${backendUrl}${req.url}`;
       console.log(`🔌 WebSocket PROXY REQUEST: ${req.url}`);
       console.log(`   → Target: ${fullUrl}`);
+      console.log(`   → Headers:`, JSON.stringify(proxyReq.getHeaders(), null, 2));
     },
     onOpen: (proxySocket) => {
       console.log("✅ WebSocket connection OPENED to backend");
+      proxySocket.on("error", (err) => {
+        console.error("❌ Proxy socket error:", err.message);
+      });
     },
     onClose: (res, socket, head) => {
       console.log("🔌 WebSocket connection CLOSED");
     },
     onError: (err, req, socket) => {
       console.error("❌ WebSocket PROXY ERROR:");
-      console.error(`   URL: ${req.url}`);
+      console.error(`   URL: ${req?.url || 'unknown'}`);
       console.error(`   Target: ${backendUrl}`);
-      console.error(`   Error: ${err.message}`);
+      console.error(`   Error message: ${err.message}`);
+      console.error(`   Error code: ${err.code}`);
+      console.error(`   Error stack:`, err.stack);
+
+      // Send error response to client
+      if (socket && socket.writable) {
+        socket.end();
+      }
     },
   });
 
@@ -77,7 +114,22 @@ app.prepare().then(() => {
 
     if (pathname === "/api/ws") {
       console.log(`   ✅ Proxying to backend: ${backendUrl}${req.url}`);
-      wsProxy.upgrade(req, socket, head);
+
+      // Add error handler for the socket
+      socket.on("error", (err) => {
+        console.error("❌ Socket error during upgrade:", err.message);
+        console.error("   Stack:", err.stack);
+      });
+
+      try {
+        wsProxy.upgrade(req, socket, head);
+        console.log("   📤 Upgrade call completed");
+      } catch (err) {
+        console.error("❌ Exception during wsProxy.upgrade():");
+        console.error(`   Error: ${err.message}`);
+        console.error(`   Stack: ${err.stack}`);
+        socket.destroy();
+      }
     } else {
       console.log(`   ❌ Invalid WebSocket path, destroying socket`);
       socket.destroy();
