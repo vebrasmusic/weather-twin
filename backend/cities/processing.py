@@ -23,7 +23,7 @@ class Processing:
 
         if location is None:
             raise HTTPException(
-                status.HTTP_404_NOT_FOUND, "City could not be geocoded."
+                status.HTTP_404_NOT_FOUND, "Couldn't find that city. Please check the spelling and try again."
             )
         self.coords = (location.latitude, location.longitude)
         return self
@@ -42,7 +42,7 @@ class Processing:
         if normals_data is None or normals_data.empty:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,
-                "No climate data found for station.",
+                "Couldn't find initial climate data for that city. Please try a different city or a larger nearby city.",
             )
         if "month" not in normals_data.columns and len(normals_data) == 12:
             normals_data["month"] = list(range(1, 13))
@@ -63,8 +63,8 @@ class Processing:
 
         if not relevant_columns:
             raise HTTPException(
-                status.HTTP_500_INTERNAL_SERVER_ERROR,
-                "no relevant climate metrics for station",
+                status.HTTP_404_NOT_FOUND,
+                "Not enough climate data available for that city. Please try a different city.",
             )
         self.normals_data = normals_data
         return self

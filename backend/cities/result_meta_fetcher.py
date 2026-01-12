@@ -32,12 +32,10 @@ def fetch_country(city_data: CityData) -> str | None:
 
 def fetch_weather(city_data: CityData):
     try:
-        print(f"Fetching weather for: {city_data.metadata.city} ({city_data.metadata.lat}, {city_data.metadata.lng})")
         stations = Stations().nearby(lat=city_data.metadata.lat, lon=city_data.metadata.lng)
         station = stations.fetch(1)
 
         if station is None or station.empty:
-            print(f"No weather station found near {city_data.metadata.city}")
             return {
                 "temp": None,
                 "pressure": None,
@@ -45,12 +43,10 @@ def fetch_weather(city_data: CityData):
                 "rainfall": None,
             }
 
-        print(f"Found station: {station.index[0]}")
         normals = Normals(station, 1991, 2020)
         normals_data = normals.fetch()
 
         if normals_data is None or normals_data.empty:
-            print(f"No normals data available for station near {city_data.metadata.city}")
             return {
                 "temp": None,
                 "pressure": None,
@@ -58,10 +54,9 @@ def fetch_weather(city_data: CityData):
                 "rainfall": None,
             }
 
-        print(f"Successfully fetched weather data for {city_data.metadata.city}")
         normals_data = normals_data.fillna(value=-1)
     except Exception as exception:
-        print(f"⚠️ Error fetching weather data for {city_data.metadata.city}: {type(exception).__name__}: {exception}")
+        print(f"Error fetching weather data for {city_data.metadata.city}: {type(exception).__name__}: {exception}")
         return {
             "temp": None,
             "pressure": None,
