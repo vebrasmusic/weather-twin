@@ -233,17 +233,6 @@ npm run dev
 
 ### Endpoints
 
-#### `GET /api/health`
-Health check endpoint with egress verification.
-
-**Response:**
-```json
-{
-  "status": "ok",
-  "egress_to_meteostat": true
-}
-```
-
 #### `GET /api/matches`
 Find climate-similar cities.
 
