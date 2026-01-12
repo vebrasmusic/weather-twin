@@ -66,21 +66,14 @@ async def websocket_endpoint(websocket: WebSocket, request_id: str):
     """
     init websocket conn, add to the connection manager so we know who to send the actual result data too later.
     """
-    print(f"🔌 [Backend] WebSocket connection request received")
-    print(f"   Request ID: {request_id}")
-    print(f"   Client: {websocket.client}")
-    print(f"   Headers: {dict(websocket.headers)}")
-
     try:
         await manager.connect(websocket, request_id)
-        print(f"✅ [Backend] WebSocket connected for request_id: {request_id}")
 
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        print(f"🔌 [Backend] WebSocket disconnected for request_id: {request_id}")
         manager.disconnect(request_id)
     except Exception as e:
-        print(f"❌ [Backend] WebSocket error for request_id: {request_id}")
+        print(f"[Backend] WebSocket error for request_id: {request_id}")
         print(f"   Error: {str(e)}")
         manager.disconnect(request_id)
